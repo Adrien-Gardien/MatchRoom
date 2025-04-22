@@ -36,7 +36,7 @@ RUN install-php-extensions pgsql  \
     tokenizer \
     xml \
     session \
-    ftp; \
+    ftp;
 
 WORKDIR /app
 
