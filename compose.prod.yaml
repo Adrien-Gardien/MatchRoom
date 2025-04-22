@@ -1,0 +1,25 @@
+services:
+  db:
+    image: mysql:latest
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${DB}
+      MYSQL_USER: ${DB_USER}
+      MYSQL_PASSWORD: ${DB_PASSWORD}
+
+  backend:
+    image: ghcr.io/camille-girard/backend
+    depends_on:
+      - db
+
+  frontend:
+    image: ghcr.io/camille-girard/frontend
+
+  nginx:
+    image: ghcr.io/camille-girard/nginx
+    ports:
+      - '80:80'
+    depends_on:
+      - backend
+      - frontend

@@ -1,0 +1,48 @@
+services:
+    db:
+        image: postgres:17
+        restart: always
+        volumes:
+            - db_data:/var/lib/postgresql/data
+        environment:
+            POSTGRES_USER: ${DB_USER}
+            POSTGRES_PASSWORD: ${DB_PASSWORD}
+            POSTGRES_DB: ${DB_DATABASE}
+
+    backend:
+        build:
+            context: backend
+            dockerfile: docker/Dockerfile
+            target: dev
+            args:
+                PHP_VERSION: 8.4.1
+        volumes:
+            - ./backend:/app
+            - ./backend:/var/www/html
+        ports:
+            - "8000:8080"
+        depends_on:
+            - db
+
+    frontend:
+        build:
+            context: ./frontend
+            dockerfile: Dockerfile
+            target: dev
+        volumes:
+            - ./frontend:/app
+            - /app/node_modules
+        ports:
+            - "3000:3000"
+
+    nginx:
+        build:
+            context: nginx
+            dockerfile: Dockerfile
+        ports:
+            - "80:80"
+        volumes:
+            - ./backend:/var/www/html
+        depends_on:
+            - backend
+            - frontend
