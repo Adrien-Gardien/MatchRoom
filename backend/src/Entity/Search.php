@@ -20,6 +20,9 @@ class Search
     #[ORM\Column(type: Types::DATETIME_MUTABLE)]
     private ?\DateTimeInterface $searchDate = null;
 
+    #[ORM\ManyToOne(inversedBy: 'searches')]
+    private ?User $userId = null;
+
     public function getId(): ?int
     {
         return $this->id;
@@ -45,6 +48,18 @@ class Search
     public function setSearchDate(\DateTimeInterface $searchDate): static
     {
         $this->searchDate = $searchDate;
+
+        return $this;
+    }
+
+    public function getUserId(): ?User
+    {
+        return $this->userId;
+    }
+
+    public function setUserId(?User $userId): static
+    {
+        $this->userId = $userId;
 
         return $this;
     }

@@ -23,6 +23,12 @@ class Offer
     #[ORM\Column(type: Types::DATE_MUTABLE)]
     private ?\DateTimeInterface $offerDate = null;
 
+    #[ORM\ManyToOne(inversedBy: 'offers')]
+    private ?User $userId = null;
+
+    #[ORM\ManyToOne(inversedBy: 'offers')]
+    private ?Room $roomId = null;
+
     public function getId(): ?int
     {
         return $this->id;
@@ -60,6 +66,30 @@ class Offer
     public function setOfferDate(\DateTimeInterface $offerDate): static
     {
         $this->offerDate = $offerDate;
+
+        return $this;
+    }
+
+    public function getUserId(): ?User
+    {
+        return $this->userId;
+    }
+
+    public function setUserId(?User $userId): static
+    {
+        $this->userId = $userId;
+
+        return $this;
+    }
+
+    public function getRoomId(): ?Room
+    {
+        return $this->roomId;
+    }
+
+    public function setRoomId(?Room $roomId): static
+    {
+        $this->roomId = $roomId;
 
         return $this;
     }

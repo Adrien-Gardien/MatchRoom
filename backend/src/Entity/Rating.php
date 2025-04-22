@@ -23,6 +23,12 @@ class Rating
     #[ORM\Column(type: Types::DATE_MUTABLE)]
     private ?\DateTimeInterface $date = null;
 
+    #[ORM\ManyToOne(inversedBy: 'ratings')]
+    private ?User $authorId = null;
+
+    #[ORM\ManyToOne(inversedBy: 'ratings')]
+    private ?Room $roomId = null;
+
     public function getId(): ?int
     {
         return $this->id;
@@ -60,6 +66,30 @@ class Rating
     public function setDate(\DateTimeInterface $date): static
     {
         $this->date = $date;
+
+        return $this;
+    }
+
+    public function getAuthorId(): ?User
+    {
+        return $this->authorId;
+    }
+
+    public function setAuthorId(?User $authorId): static
+    {
+        $this->authorId = $authorId;
+
+        return $this;
+    }
+
+    public function getRoomId(): ?Room
+    {
+        return $this->roomId;
+    }
+
+    public function setRoomId(?Room $roomId): static
+    {
+        $this->roomId = $roomId;
 
         return $this;
     }

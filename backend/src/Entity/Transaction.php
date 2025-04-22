@@ -26,6 +26,9 @@ class Transaction
     #[ORM\Column(type: Types::DATETIME_MUTABLE)]
     private ?\DateTimeInterface $date = null;
 
+    #[ORM\OneToOne(cascade: ['persist', 'remove'])]
+    private ?Booking $bookingId = null;
+
     public function getId(): ?int
     {
         return $this->id;
@@ -75,6 +78,18 @@ class Transaction
     public function setDate(\DateTimeInterface $date): static
     {
         $this->date = $date;
+
+        return $this;
+    }
+
+    public function getBookingId(): ?Booking
+    {
+        return $this->bookingId;
+    }
+
+    public function setBookingId(?Booking $bookingId): static
+    {
+        $this->bookingId = $bookingId;
 
         return $this;
     }
