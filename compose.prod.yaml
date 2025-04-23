@@ -1,25 +1,26 @@
 services:
-  db:
-    image: mysql:latest
-    restart: always
-    environment:
-      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}
-      MYSQL_DATABASE: ${DB}
-      MYSQL_USER: ${DB_USER}
-      MYSQL_PASSWORD: ${DB_PASSWORD}
+    db:
+        image: postgres:17
+        restart: always
+        volumes:
+            - db_data:/var/lib/postgresql/data
+        environment:
+            POSTGRES_USER: ${DB_USER}
+            POSTGRES_PASSWORD: ${DB_PASSWORD}
+            POSTGRES_DB: ${DB_DATABASE}
 
-  backend:
-    image: ghcr.io/camille-girard/backend
-    depends_on:
-      - db
+    backend:
+        image: registry.nassimlounadi.fr/nassimlounadi/matchroom-backend
+        depends_on:
+            - db
 
-  frontend:
-    image: ghcr.io/camille-girard/frontend
+    frontend:
+        image: registry.nassimlounadi.fr/nassimlounadi/matchroom-frontend
 
-  nginx:
-    image: ghcr.io/camille-girard/nginx
-    ports:
-      - '80:80'
-    depends_on:
-      - backend
-      - frontend
+    nginx:
+        image: registry.nassimlounadi.fr/nassimlounadi/matchroom-nginx
+        ports:
+            - "4010:80"
+        depends_on:
+            - backend
+            - frontend
