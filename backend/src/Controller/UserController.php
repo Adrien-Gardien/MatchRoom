@@ -2,18 +2,22 @@
 
 namespace App\Controller;
 
+use App\Repository\UserRepository;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\Serializer\SerializerInterface;
 
+#[Route('/api')]
 final class UserController extends AbstractController
 {
-    #[Route('/user', name: 'app_user')]
-    public function index(): JsonResponse
+    #[Route('/me', name: 'app_user')]
+    public function me(UserRepository $userRepository, SerializerInterface $serializerInterface): JsonResponse
     {
-        return $this->json([
-            'message' => 'Welcome to your new controller!',
-            'path' => 'src/Controller/UserController.php',
-        ]);
+        $current_user = $this->getUser();
+        $user = $userRepository->findBy(['email' => $current_user->getUserIdentifier()])[0];
+        $userSerialized = $serializerInterface->serialize($user, 'json', ['ignored_attributes' => ['password', 'userIdentifier']]);
+
+        return JsonResponse::fromJsonString($userSerialized);
     }
 }
