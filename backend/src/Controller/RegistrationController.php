@@ -27,32 +27,19 @@ final class RegistrationController extends AbstractController
     public function register(Request $request, UserPasswordHasherInterface $passwordHasher, EntityManagerInterface $em): JsonResponse
     {
         $data = json_decode($request->getContent(), true);
-    
+        
+        $verificationCode = bin2hex(random_bytes(16));
+
         $user = new User();
         $user->setEmail($data['email']);
         $user->setFirstName($data['first_name']);
         $user->setLastName($data['last_name']);
         $user->setPassword($passwordHasher->hashPassword($user, $data['password']));
-        
+        $user->setVerificationCode($verificationCode);
         $em->persist($user);
         $em->flush();
 
-        $verificationCode = rand(100000, 999999);
-        $value = json_encode([
-            'verification_code' => $verificationCode,
-            'user_email' => $user->getEmail(),
-        ]);
-        $cookie = new Cookie(
-            'informations',
-            $value,
-            time() + 900,
-            '/',
-            null,
-            false,
-            true
-        );
         $response = new JsonResponse(['message' => 'User created'], Response::HTTP_CREATED);
-        $response->headers->setCookie($cookie);
     
         $this->emailService->sendConfirmationEmail($user->getEmail(), $verificationCode);
 

@@ -32,34 +32,22 @@ class VerifyController extends AbstractController
     {
         $data = json_decode($request->getContent(), true);
         $verificationToken = $data['token'] ?? null;
-    
+
         if (!$verificationToken) {
             return new JsonResponse(['success' => false, 'message' => 'Token not provided.'], Response::HTTP_BAD_REQUEST);
         }
-    
-        $cookieData = $request->cookies->get('informations');
-        $cookieDecodedData = json_decode($cookieData, true);
-    
-        if (!$cookieDecodedData || !isset($cookieDecodedData['verification_code'], $cookieDecodedData['user_email'])) {
-            return new JsonResponse(['success' => false, 'message' => 'Invalid or missing cookie data.'], Response::HTTP_BAD_REQUEST);
-        }
-        
-        if ($verificationToken !== (string)$cookieDecodedData['verification_code']) {
-            return new JsonResponse(['success' => false, 'message' => 'Invalid or expired token.'], Response::HTTP_NOT_FOUND);
-        }
-    
-        $userEmail = $cookieDecodedData['user_email'];
-        $user = $this->userRepository->findOneBy(['email' => $userEmail]);
-    
+
+        $user = $this->userRepository->findOneBy(['verificationCode' => $verificationToken]);
+
         if (!$user) {
             return new JsonResponse(['success' => false, 'message' => 'User not found or invalid token.'], Response::HTTP_NOT_FOUND);
         }
-    
+
         $user->setIsVerified(true);
-    
+
         $entityManager = $this->managerRegistry->getManager();
         $entityManager->flush();
-    
+
         return new JsonResponse(['success' => true, 'message' => 'Your email address has been verified.'], Response::HTTP_OK);
     }
 }

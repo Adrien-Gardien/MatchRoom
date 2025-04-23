@@ -99,6 +99,9 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column]
     private bool $isVerified = false;
 
+    #[ORM\Column(length: 255)]
+    private ?string $verificationCode = null;
+
     public function __construct()
     {
         $this->bookings = new ArrayCollection();
@@ -470,6 +473,18 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function setIsVerified(bool $isVerified): static
     {
         $this->isVerified = $isVerified;
+
+        return $this;
+    }
+
+    public function getVerificationCode(): ?string
+    {
+        return $this->verificationCode;
+    }
+
+    public function setVerificationCode(string $verificationCode): static
+    {
+        $this->verificationCode = $verificationCode;
 
         return $this;
     }

@@ -7,7 +7,10 @@ namespace DoctrineMigrations;
 use Doctrine\DBAL\Schema\Schema;
 use Doctrine\Migrations\AbstractMigration;
 
-final class Version20250423082642 extends AbstractMigration
+/**
+ * Auto-generated Migration: Please modify to your needs!
+ */
+final class Version20250423163419 extends AbstractMigration
 {
     public function getDescription(): string
     {
@@ -123,6 +126,15 @@ final class Version20250423082642 extends AbstractMigration
             CREATE UNIQUE INDEX UNIQ_723705D1EE3863E2 ON transaction (booking_id_id)
         SQL);
         $this->addSql(<<<'SQL'
+            CREATE TABLE "user" (id SERIAL NOT NULL, hotel_id INT DEFAULT NULL, email VARCHAR(180) NOT NULL, roles JSON NOT NULL, password VARCHAR(255) NOT NULL, first_name VARCHAR(255) NOT NULL, last_name VARCHAR(255) NOT NULL, is_verified BOOLEAN NOT NULL, verification_code VARCHAR(255) NOT NULL, PRIMARY KEY(id))
+        SQL);
+        $this->addSql(<<<'SQL'
+            CREATE INDEX IDX_8D93D6493243BB18 ON "user" (hotel_id)
+        SQL);
+        $this->addSql(<<<'SQL'
+            CREATE UNIQUE INDEX UNIQ_IDENTIFIER_EMAIL ON "user" (email)
+        SQL);
+        $this->addSql(<<<'SQL'
             CREATE TABLE user_badge (id SERIAL NOT NULL, user_id_id INT DEFAULT NULL, badge_id_id INT DEFAULT NULL, awarded_date TIMESTAMP(0) WITHOUT TIME ZONE NOT NULL, PRIMARY KEY(id))
         SQL);
         $this->addSql(<<<'SQL'
@@ -213,6 +225,9 @@ final class Version20250423082642 extends AbstractMigration
             ALTER TABLE transaction ADD CONSTRAINT FK_723705D1EE3863E2 FOREIGN KEY (booking_id_id) REFERENCES booking (id) NOT DEFERRABLE INITIALLY IMMEDIATE
         SQL);
         $this->addSql(<<<'SQL'
+            ALTER TABLE "user" ADD CONSTRAINT FK_8D93D6493243BB18 FOREIGN KEY (hotel_id) REFERENCES hotel (id) NOT DEFERRABLE INITIALLY IMMEDIATE
+        SQL);
+        $this->addSql(<<<'SQL'
             ALTER TABLE user_badge ADD CONSTRAINT FK_1C32B3459D86650F FOREIGN KEY (user_id_id) REFERENCES "user" (id) NOT DEFERRABLE INITIALLY IMMEDIATE
         SQL);
         $this->addSql(<<<'SQL'
@@ -233,21 +248,6 @@ final class Version20250423082642 extends AbstractMigration
         $this->addSql(<<<'SQL'
             ALTER TABLE user_preference_service ADD CONSTRAINT FK_2D357339ED5CA9E6 FOREIGN KEY (service_id) REFERENCES service (id) ON DELETE CASCADE NOT DEFERRABLE INITIALLY IMMEDIATE
         SQL);
-        $this->addSql(<<<'SQL'
-            ALTER TABLE "user" ADD hotel_id INT DEFAULT NULL
-        SQL);
-        $this->addSql(<<<'SQL'
-            ALTER TABLE "user" ADD first_name VARCHAR(255) NOT NULL
-        SQL);
-        $this->addSql(<<<'SQL'
-            ALTER TABLE "user" ADD last_name VARCHAR(255) NOT NULL
-        SQL);
-        $this->addSql(<<<'SQL'
-            ALTER TABLE "user" ADD CONSTRAINT FK_8D93D6493243BB18 FOREIGN KEY (hotel_id) REFERENCES hotel (id) NOT DEFERRABLE INITIALLY IMMEDIATE
-        SQL);
-        $this->addSql(<<<'SQL'
-            CREATE INDEX IDX_8D93D6493243BB18 ON "user" (hotel_id)
-        SQL);
     }
 
     public function down(Schema $schema): void
@@ -255,9 +255,6 @@ final class Version20250423082642 extends AbstractMigration
         // this down() migration is auto-generated, please modify it to your needs
         $this->addSql(<<<'SQL'
             CREATE SCHEMA public
-        SQL);
-        $this->addSql(<<<'SQL'
-            ALTER TABLE "user" DROP CONSTRAINT FK_8D93D6493243BB18
         SQL);
         $this->addSql(<<<'SQL'
             ALTER TABLE booking DROP CONSTRAINT FK_E00CEDDE9D86650F
@@ -315,6 +312,9 @@ final class Version20250423082642 extends AbstractMigration
         SQL);
         $this->addSql(<<<'SQL'
             ALTER TABLE transaction DROP CONSTRAINT FK_723705D1EE3863E2
+        SQL);
+        $this->addSql(<<<'SQL'
+            ALTER TABLE "user" DROP CONSTRAINT FK_8D93D6493243BB18
         SQL);
         $this->addSql(<<<'SQL'
             ALTER TABLE user_badge DROP CONSTRAINT FK_1C32B3459D86650F
@@ -383,6 +383,9 @@ final class Version20250423082642 extends AbstractMigration
             DROP TABLE transaction
         SQL);
         $this->addSql(<<<'SQL'
+            DROP TABLE "user"
+        SQL);
+        $this->addSql(<<<'SQL'
             DROP TABLE user_badge
         SQL);
         $this->addSql(<<<'SQL'
@@ -393,18 +396,6 @@ final class Version20250423082642 extends AbstractMigration
         SQL);
         $this->addSql(<<<'SQL'
             DROP TABLE user_preference_service
-        SQL);
-        $this->addSql(<<<'SQL'
-            DROP INDEX IDX_8D93D6493243BB18
-        SQL);
-        $this->addSql(<<<'SQL'
-            ALTER TABLE "user" DROP hotel_id
-        SQL);
-        $this->addSql(<<<'SQL'
-            ALTER TABLE "user" DROP first_name
-        SQL);
-        $this->addSql(<<<'SQL'
-            ALTER TABLE "user" DROP last_name
         SQL);
     }
 }
