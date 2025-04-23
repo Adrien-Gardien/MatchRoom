@@ -49,6 +49,9 @@ class Hotel
     #[ORM\OneToMany(targetEntity: Favorite::class, mappedBy: 'hotelId')]
     private Collection $favorites;
 
+    #[ORM\Column(length: 255)]
+    private ?string $image = null;
+
     public function __construct()
     {
         $this->owners = new ArrayCollection();
@@ -207,6 +210,18 @@ class Hotel
                 $favorite->setHotelId(null);
             }
         }
+
+        return $this;
+    }
+
+    public function getImage(): ?string
+    {
+        return $this->image;
+    }
+
+    public function setImage(string $image): static
+    {
+        $this->image = $image;
 
         return $this;
     }
