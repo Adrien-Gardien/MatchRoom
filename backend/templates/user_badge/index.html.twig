@@ -1,0 +1,35 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}UserBadge index{% endblock %}
+
+{% block body %}
+    <h1>UserBadge index</h1>
+
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Id</th>
+                <th>AwardedDate</th>
+                <th>actions</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for user_badge in user_badges %}
+            <tr>
+                <td>{{ user_badge.id }}</td>
+                <td>{{ user_badge.awardedDate ? user_badge.awardedDate|date('Y-m-d H:i:s') : '' }}</td>
+                <td>
+                    <a href="{{ path('app_user_badge_show', {'id': user_badge.id}) }}">show</a>
+                    <a href="{{ path('app_user_badge_edit', {'id': user_badge.id}) }}">edit</a>
+                </td>
+            </tr>
+        {% else %}
+            <tr>
+                <td colspan="3">no records found</td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+
+    <a href="{{ path('app_user_badge_new') }}">Create new</a>
+{% endblock %}
