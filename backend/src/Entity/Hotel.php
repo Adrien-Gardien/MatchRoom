@@ -49,6 +49,9 @@ class Hotel
     #[ORM\OneToMany(targetEntity: Favorite::class, mappedBy: 'hotelId')]
     private Collection $favorites;
 
+    #[ORM\Column]
+    private ?int $numberId = null;
+
     public function __construct()
     {
         $this->owners = new ArrayCollection();
@@ -207,6 +210,18 @@ class Hotel
                 $favorite->setHotelId(null);
             }
         }
+
+        return $this;
+    }
+
+    public function getNumberId(): ?int
+    {
+        return $this->numberId;
+    }
+
+    public function setNumberId(int $numberId): static
+    {
+        $this->numberId = $numberId;
 
         return $this;
     }
