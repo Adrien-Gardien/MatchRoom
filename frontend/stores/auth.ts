@@ -123,12 +123,18 @@ export const useAuthStore = defineStore('auth', {
                     credentials: 'include',
                 });
 
+                const authCookie = useCookie('auth');
+                const bearerCookie = useCookie('BEARER');
+                
+                authCookie.value = null;
+                bearerCookie.value = null;
+                
                 this.user = null;
-                this.isAuthenticated = false;
             } catch (error) {
-                console.error(error);
+                console.error('Erreur lors de la déconnexion:', error);
             } finally {
                 this.isLoading = false;
+                window.location.href = '/';
             }
         },
         
