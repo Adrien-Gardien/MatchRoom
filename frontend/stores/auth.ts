@@ -72,6 +72,46 @@ export const useAuthStore = defineStore('auth', {
             }
         },
 
+        async register(payload) {
+            try {
+              await $fetch('/api/register', {
+                method: 'POST',
+                body: payload,
+              })
+
+              return { success: true }
+            } catch (err) {
+              return {
+                success: false,
+                errors: err.data?.message || 'Registration failed',
+              }
+            }
+          },
+          async verifyEmail(token) {
+            try {
+              const response = await $fetch('api/verify/email', {
+                method: 'POST',
+                body: { token },
+                credentials: 'include',
+              })
+
+              if (response.success) {
+                return { success: true }
+              } else {
+                return {
+                  success: false,
+                  errors: response.message || 'Email verification failed',
+                }
+              }
+            } catch (err) {
+              const errorMessage = err?.data?.message || err.message || 'Request failed'
+              return {
+                success: false,
+                errors: errorMessage,
+              }
+            }
+          },
+
         async logout() {
             this.isLoading = true;
 
