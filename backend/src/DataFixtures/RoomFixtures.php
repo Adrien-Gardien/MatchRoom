@@ -14,20 +14,26 @@ class RoomFixtures extends Fixture
     {
         $faker = Factory::create('fr_FR');
 
-        for ($i = 0; $i < 450; $i++) {
-            $room = new Room();
-            $room->setName('Chambre ' . strtoupper($faker->bothify('??-###')));
-            $room->setDescription($faker->paragraph(2));
-            $room->setPricePerNight($faker->randomFloat(2, 50, 300));
-            $room->setCapacity($faker->numberBetween(1, 5));
+        // Récupérer tous les hôtels existants
+        $hotels = $manager->getRepository(Hotel::class)->findAll();
 
-            $hotel = $manager->getRepository(Hotel::class)->find($faker->numberBetween(1, 50));
-            if ($hotel) {
+        // S'assurer qu'il y a des hôtels avant de continuer
+        if (!empty($hotels)) {
+            for ($i = 0; $i < 450; $i++) {
+                $room = new Room();
+                $room->setName('Chambre ' . strtoupper($faker->bothify('??-###')));
+                $room->setDescription($faker->paragraph(2));
+                $room->setPricePerNight($faker->randomFloat(2, 50, 300));
+                $room->setCapacity($faker->numberBetween(1, 5));
+
+                // Sélectionner un hôtel au hasard parmi les hôtels existants
+                $hotel = $faker->randomElement($hotels);
                 $room->setHotel($hotel);
+
                 $manager->persist($room);
             }
-        }
 
-        $manager->flush();
+            $manager->flush();
+        }
     }
 }
