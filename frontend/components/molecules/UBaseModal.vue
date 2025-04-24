@@ -56,7 +56,7 @@
     <transition name="modal">
         <div v-if="isOpen" class="fixed inset-0 z-50 flex items-center justify-center" @click.self="close">
             <div
-                class="relative bg-primary rounded-2xl shadow-xl max-w-lg w-full transform transition-all overflow-hidden"
+                class="relative bg-primary rounded-2xl shadow-xl max-w-lg w-full transform transition-all "
             >
                 <component
                     :is="backgroundComponent[background]"

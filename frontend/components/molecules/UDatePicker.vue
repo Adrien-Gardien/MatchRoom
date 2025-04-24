@@ -167,6 +167,7 @@
                 {{ label }} <span v-if="required" class="text-brand-tertiary">*</span>
             </label>
             <UButton
+                type="button"
                 variant="secondary"
                 :icon="CalendarIcon"
                 icon-position="leading"
