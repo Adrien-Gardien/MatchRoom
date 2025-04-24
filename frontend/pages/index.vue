@@ -1,112 +1,110 @@
 <script setup lang="ts">
-    import ImageTextSection from '~/components/organisms/ImageTextSection.vue';
-    import RoomCarousel from '~/components/organisms/RoomCarousel.vue';
-    import type { Room } from '~/types/room';
-    import HotelCard from '~/components/organisms/HotelCard.vue';
-    import type { Hotel } from '~/types/hotel';
+import { ref, computed, onMounted } from 'vue';
+import { useRoute, useRouter, navigateTo } from '#imports';
+import ImageTextSection from '~/components/organisms/ImageTextSection.vue';
+import RoomCarousel from '~/components/organisms/RoomCarousel.vue';
+import HotelCard from '~/components/organisms/HotelCard.vue';
+import type { Room } from '~/types/room';
+import type { Hotel } from '~/types/hotel';
 
-    // Dates pour la recherche
-    const searchDates = ref({
-        checkIn: '',
-        checkOut: '',
-    });
-    const { $api } = useNuxtApp();
+const { $api } = useNuxtApp();
 
-    // Obtenir la date d'aujourd'hui au format YYYY-MM-DD pour limiter les dates passées
-    const today = new Date().toISOString().split('T')[0];
+// Dates pour la recherche
+const searchDates = ref({
+  checkIn: '',
+  checkOut: '',
+});
+const today = new Date().toISOString().split('T')[0];
+const minCheckoutDate = computed(() => searchDates.value.checkIn || today);
 
-    // Mise à jour de la date de départ minimum quand la date d'arrivée change
-    const minCheckoutDate = computed(() => {
-        return searchDates.value.checkIn || today;
-    });
+// Formater les dates pour l’affichage
+const formatDate = (dateString: string) => {
+  if (!dateString) return '';
+  const date = new Date(dateString);
+  const day = date.getDate().toString().padStart(2, '0');
+  const month = (date.getMonth() + 1).toString().padStart(2, '0');
+  return `${day}/${month}`;
+};
 
-    // Formater les dates pour l'affichage
-    const formatDate = (dateString: string) => {
-        if (!dateString) return '';
-        const date = new Date(dateString);
-        const day = date.getDate().toString().padStart(2, '0');
-        const month = (date.getMonth() + 1).toString().padStart(2, '0');
-        return `${day}/${month}`;
-    };
+// Données pour les chambres et hôtels
+const room = ref<Room[]>([]);
+const hotels = ref<Hotel[]>([]);
+const error = ref<string>('');
 
-    // Variable pour stocker les données des chambres
-    const room = ref<Room[]>([]);
-    const hotels = ref<Hotel[]>([]);
-    const error = ref<string>('');
+// Fetch chambres
+const fetchRooms = async () => {
+  try {
+    const response = await useAuthFetch<Room[]>($api('/api/room/first-20'));
+    room.value = response.data.value ?? [];
+    error.value = '';
+  } catch (err) {
+    console.error(err);
+    error.value = 'Erreur lors du chargement des chambres.';
+  }
+};
 
-    // Récupération des données de la chambre
-    const fetchRooms = async () => {
-        try {
-            const response = await useAuthFetch<Room[]>($api(`/api/room/first-20`));
-            console.log("Réponse de l'API:", response);
-            room.value = response.data.value ?? [];
-            error.value = '';
-        } catch (err) {
-            console.error(err);
-            error.value = 'Erreur lors du chargement des données de la chambre.';
-        }
-    };
+// Fetch hôtels
+const fetchHotels = async () => {
+  try {
+    const response = await useAuthFetch<Hotel[]>($api('/api/hotel/first-20'));
+    hotels.value = response.data.value ?? [];
+  } catch (err) {
+    console.error(err);
+    error.value = 'Erreur lors du chargement des hôtels.';
+  }
+};
 
-    const fetchHotels = async () => {
-        try {
-            const response = await useAuthFetch<Hotel[]>($api(`/api/hotel/first-20`));
-            console.log("Réponse de l'API:", response);
-            hotels.value = response.data.value ?? [];
-        } catch (err) {
-            console.error(err);
-            error.value = 'Erreur lors du chargement des données des hôtels.';
-        }
-    };
+onMounted(() => {
+  fetchRooms();
+  fetchHotels();
+});
 
-    onMounted(() => {
-        fetchRooms();
-        fetchHotels();
-    });
+// Formattage des chambres pour RoomCarousel
+const formattedRooms = computed(() => {
+  if (!room.value || room.value.length === 0) return [];
+  return room.value.map((r) => ({
+    id: r.id,
+    title: r.name,
+    h5Title: r.hotelName || 'Hôtel',
+    h4Title: `Capacité: ${r.capacity} personne(s)`,
+    h6Title: r.description?.length > 60 ? r.description.substring(0, 60) + '...' : r.description || '',
+    image: 'https://images.unsplash.com/photo-1566073771259-6a8506099945?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80',
+    rating: '9.0',
+    reviewCount: '50',
+    price: `${r.pricePerNight}€ / nuit`,
+    discount: '-15% à -30%',
+  }));
+});
 
-    // Formatage des données pour le composant RoomCarousel
-    const formattedRooms = computed(() => {
-        console.log(room);
-        if (!room.value || room.value.length === 0) return [];
-        return (room.value as Room[]).map((room: Room) => ({
-            id: room.id,
-            title: room.name,
-            h5Title: room.hotelName || 'Hôtel',
-            h4Title: `Capacité: ${room.capacity} personne(s)`,
-            h6Title: room.description
-                ? room.description.length > 60
-                    ? room.description.substring(0, 60) + '...'
-                    : room.description
-                : '',
-            image: 'https://images.unsplash.com/photo-1566073771259-6a8506099945?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80',
-            rating: '9.0',
-            reviewCount: '50',
-            price: `${room.pricePerNight}€ / nuit`,
-            discount: '-15% à -30%',
-        }));
-    });
+// Formattage des hôtels pour HotelCard
+const formattedHotels = computed(() => {
+  if (!hotels.value || hotels.value.length === 0) return [];
+  return hotels.value.map((hotel) => ({
+    id: hotel.id,
+    title: hotel.name,
+    description: hotel.description,
+    city: hotel.city,
+    country: hotel.country,
+    image: hotel.image || 'https://images.unsplash.com/photo-1566073771259-6a8506099945?ixlib=rb-4.0.3&auto=format&fit=crop&q=80',
+    rooms: hotel.rooms,
+    favorites: hotel.favorites,
+    owners: hotel.owners,
+    tag: hotel.city || 'Premium',
+    tagType: 'premium',
+    rating: '4.8',
+  }));
+});
 
-    // Formatage des données pour le composant HotelCarousel
-    const formattedHotels = computed(() => {
-        console.log('formattedHotels', !hotels.value)
-        if (!hotels.value || hotels.value.length === 0) return [];
-        console.log('hotels', hotels.value);
-        return (hotels.value as Hotel[]).map((hotel: Hotel) => ({
-            id: hotel.id,
-            title: hotel.name,
-            description: hotel.description,
-            city: hotel.city,
-            country: hotel.country,
-            image:
-                hotel.image ||
-                'https://images.unsplash.com/photo-1566073771259-6a8506099945?ixlib=rb-4.0.3&auto=format&fit=crop&q=80',
-            rooms: hotel.rooms,
-            favorites: hotel.favorites,
-            owners: hotel.owners,
-            tag: hotel.city || 'Premium',
-            tagType: 'premium',
-            rating: '4.8',
-        }));
-    });
+const destination = ref('');
+const router = useRouter();
+
+const goToHotelSearch = () => {
+  const value = destination.value.trim();
+  if (!value) return;
+
+  const query = encodeURIComponent(value);
+  router.push(`/hotel?country=${query}`);
+};
 </script>
 
 <template>
@@ -150,11 +148,12 @@
                     <!-- Destination -->
                     <div class="p-3 text-center">
                         <p class="text-quincy-light text-sm mb-1">Destination</p>
-                        <input
-                            type="text"
-                            placeholder="Paris, Nice..."
-                            class="w-full text-sm bg-transparent border-0 focus:ring-0 text-quincy text-center placeholder:text-gray-400"
-                        />
+                      <input
+                          v-model="destination"
+                          type="text"
+                          placeholder="Paris, Nice..."
+                          class="w-full text-sm bg-transparent border-0 focus:ring-0 text-quincy text-center placeholder:text-gray-400"
+                      />
                     </div>
 
                     <!-- Date de départ -->
@@ -243,7 +242,10 @@
                     <div
                         class="flex items-center justify-center text-center m-4 rounded-xl bg-[#D2E8FF]/70 text-everglade transition-colors"
                     >
-                        <button class="w-full py-3 font-semibold text-sm">Rechercher</button>
+                      <button @click="goToHotelSearch" class="w-full py-3 font-semibold text-sm">
+                        Rechercher
+                      </button>
+
                     </div>
                 </div>
             </div>
