@@ -66,7 +66,7 @@
 
 /* Mode sombre */
 .dark {
-  --bg-primary: #1A2E1D;
+  --bg-primary: #fff9e9;
   --bg-primary-alt: #26422A;
   --bg-primary-hover: #335A3A;
   --bg-primary-solid: #26422A;
