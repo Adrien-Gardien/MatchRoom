@@ -7,6 +7,7 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Serializer\Annotation\Groups;
 
 #[ORM\Entity(repositoryClass: RoomRepository::class)]
 class Room
@@ -14,63 +15,76 @@ class Room
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
+    #[Groups(['room:read', 'hotel:read', 'favorite:read', 'booking:read', 'offer:read', 'rating:read'])]
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
+    #[Groups(['room:read', 'hotel:read', 'favorite:read', 'booking:read', 'offer:read', 'rating:read'])]
     private ?string $name = null;
 
     #[ORM\Column(type: Types::TEXT)]
+    #[Groups(['room:read', 'hotel:read', 'favorite:read'])]
     private ?string $description = null;
 
     #[ORM\Column(type: Types::DECIMAL, precision: 10, scale: 2)]
+    #[Groups(['room:read', 'hotel:read', 'favorite:read', 'booking:read', 'offer:read'])]
     private ?string $pricePerNight = null;
 
     #[ORM\Column]
+    #[Groups(['room:read', 'hotel:read', 'favorite:read'])]
     private ?int $capacity = null;
 
     #[ORM\ManyToOne(inversedBy: 'rooms')]
+    #[Groups(['room:read'])]  // Ne pas inclure dans hotel:read pour éviter circularité
     private ?Hotel $hotel = null;
 
     /**
      * @var Collection<int, Service>
      */
     #[ORM\ManyToMany(targetEntity: Service::class, inversedBy: 'rooms')]
+    #[Groups(['room:read'])]
     private Collection $service;
 
     /**
      * @var Collection<int, Ambiance>
      */
     #[ORM\ManyToMany(targetEntity: Ambiance::class, inversedBy: 'rooms')]
+    #[Groups(['room:read'])]
     private Collection $ambiance;
 
     /**
      * @var Collection<int, Booking>
      */
     #[ORM\OneToMany(targetEntity: Booking::class, mappedBy: 'roomId')]
+    #[Groups(['room:read'])]
     private Collection $bookings;
 
     /**
      * @var Collection<int, Offer>
      */
     #[ORM\OneToMany(targetEntity: Offer::class, mappedBy: 'roomId')]
+    #[Groups(['room:read'])]
     private Collection $offers;
 
     /**
      * @var Collection<int, Rating>
      */
     #[ORM\OneToMany(targetEntity: Rating::class, mappedBy: 'roomId')]
+    #[Groups(['room:read'])]
     private Collection $ratings;
 
     /**
      * @var Collection<int, Matching>
      */
     #[ORM\OneToMany(targetEntity: Matching::class, mappedBy: 'roomId')]
+    #[Groups(['room:read'])]
     private Collection $matchings;
 
     /**
      * @var Collection<int, Favorite>
      */
     #[ORM\OneToMany(targetEntity: Favorite::class, mappedBy: 'roomId')]
+    #[Groups(['room:read'])]
     private Collection $favorites;
 
     public function __construct()

@@ -1,6 +1,8 @@
 import type { UseFetchOptions } from 'nuxt/app';
 
 export async function useAuthFetch<T>(url: string, options: UseFetchOptions<T> = {}) {
+    await nextTick();
+
     const authStore = useAuthStore();
     const headers = useRequestHeaders(['cookie']);
 
@@ -11,7 +13,7 @@ export async function useAuthFetch<T>(url: string, options: UseFetchOptions<T> =
             ...(options.headers || {}),
         },
         credentials: 'include',
-        watch: false,
+        immediate: true
     };
 
     let response = await useFetch(url, finalOptions);

@@ -21,29 +21,19 @@ final class FavoriteController extends AbstractController
     public function index(FavoriteRepository $repository): JsonResponse
     {
         $favorites = $repository->findAll();
-
-        $data = array_map(function (Favorite $favorite) {
-            return [
-                'id' => $favorite->getId(),
-                'addedDate' => $favorite->getAddedDate()->format('Y-m-d H:i:s'),
-                'userId' => $favorite->getUserId()?->getId(),
-                'hotelId' => $favorite->getHotelId()?->getId(),
-                'roomId' => $favorite->getRoomId()?->getId(),
-            ];
-        }, $favorites);
-
-        return $this->json($data);
+        
+        // Utiliser les groupes de sérialisation au lieu de mapper manuellement
+        return $this->json($favorites, 200, [], [
+            'groups' => ['favorite:read']
+        ]);
     }
 
     #[Route('/{id}', name: 'show', methods: ['GET'])]
     public function show(Favorite $favorite): JsonResponse
     {
-        return $this->json([
-            'id' => $favorite->getId(),
-            'addedDate' => $favorite->getAddedDate()->format('Y-m-d H:i:s'),
-            'userId' => $favorite->getUserId()?->getId(),
-            'hotelId' => $favorite->getHotelId()?->getId(),
-            'roomId' => $favorite->getRoomId()?->getId(),
+        // Utiliser les groupes de sérialisation
+        return $this->json($favorite, 200, [], [
+            'groups' => ['favorite:read']
         ]);
     }
 

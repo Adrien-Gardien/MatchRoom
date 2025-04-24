@@ -34,6 +34,7 @@ const negotiationOffer = ref({
   numberOfNights: 0,
   totalPrice: 0
 });
+const { $api } = useNuxtApp(); 
 
 // État pour la galerie d'images
 const currentImageIndex = ref(0);
@@ -47,9 +48,9 @@ const isOfferCopied = ref(false);
 const fetchRoom = async () => {
   try {
     isLoading.value = true;
-    const response = await $fetch(`/api/room/${id}`);
+    const response = await useAuthFetch($api(`/api/room/${id}`));
 
-    room.value = response;
+    room.value = response.data.value;
     error.value = null;
 
   } catch (err) {
@@ -196,7 +197,7 @@ console.log(room);
   <div v-else-if="error" class="container mx-auto p-6 text-center bg-cream">
     <div class="bg-red-100 text-red-700 p-4 rounded-lg">
       <p>{{ error }}</p>
-      <button @click="navigateTo('/')" class="mt-4 bg-everglade text-colonial-white px-4 py-2 rounded-lg hover:bg-everglade-light transition">
+      <button class="mt-4 bg-everglade text-colonial-white px-4 py-2 rounded-lg hover:bg-everglade-light transition" @click="navigateTo('/')">
         Retour à l'accueil
       </button>
     </div>
@@ -233,8 +234,8 @@ console.log(room);
             <span class="text-colonial-white drop-shadow-lg">{{ room.capacity }} personne{{ room.capacity > 1 ? 's' : '' }}</span>
           </div>
           <button 
-            @click="navigateToHotel" 
-            class="flex items-center bg-[#FFF9E9]/20 hover:bg-[#FFF9E9]/30 px-3 py-1 rounded-lg transition-all"
+            class="flex items-center bg-[#FFF9E9]/20 hover:bg-[#FFF9E9]/30 px-3 py-1 rounded-lg transition-all" 
+            @click="navigateToHotel"
           >
             <span class="mr-2">{{ room?.hotel?.name }}</span>
             <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
@@ -297,8 +298,8 @@ console.log(room);
             <div class="flex justify-between items-center mb-6">
               <h2 class="text-3xl font-semibold text-everglade">Galerie Photo</h2>
               <button 
-                @click="openGallery(0)" 
-                class="text-everglade hover:text-everglade-light flex items-center"
+                class="text-everglade hover:text-everglade-light flex items-center" 
+                @click="openGallery(0)"
               >
                 Voir toutes les photos
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -343,7 +344,8 @@ console.log(room);
               <div v-for="rating in room.ratings" :key="rating.id" class="border-b border-colonial-white-dark pb-6 last:border-b-0">
                 <div class="flex items-center mb-2">
                   <div class="flex">
-                    <svg v-for="i in 5" :key="i" xmlns="http://www.w3.org/2000/svg" 
+                    <svg
+v-for="i in 5" :key="i" xmlns="http://www.w3.org/2000/svg" 
                       class="h-5 w-5" 
                       :class="i <= rating.score ? 'text-burning-orange' : 'text-gray-300'"
                       viewBox="0 0 20 20" 
@@ -371,8 +373,8 @@ console.log(room);
 
               <div class="space-y-4">
                 <button 
-                  @click="openNegotiationModal" 
-                  class="w-full bg-everglade text-colonial-white py-3 rounded-lg hover:bg-everglade-light transition font-semibold"
+                  class="w-full bg-everglade text-colonial-white py-3 rounded-lg hover:bg-everglade-light transition font-semibold" 
+                  @click="openNegotiationModal"
                 >
                   Faire une offre
                 </button>
@@ -404,7 +406,7 @@ console.log(room);
     <!-- Modal de négociation -->
     <UBaseModal 
       :is-open="isNegotiationModalOpen" 
-      backgroundSize="md"
+      background-size="md"
       @close="closeNegotiationModal"
     >
       <div class="p-8">
@@ -472,16 +474,16 @@ console.log(room);
           <div class="flex flex-col sm:flex-row justify-end gap-3 pt-4">
             <button 
               type="button" 
-              @click="closeNegotiationModal" 
-              class="px-4 py-2 border border-white/30 text-white rounded-md hover:bg-white/10 transition"
+              class="px-4 py-2 border border-white/30 text-white rounded-md hover:bg-white/10 transition" 
+              @click="closeNegotiationModal"
             >
               Annuler
             </button>
             <button 
               type="submit" 
-              @click.prevent="submitNegotiationOffer"
               class="px-4 py-2 bg-white text-everglade rounded-md hover:bg-colonial-white transition font-medium"
               :disabled="negotiationOffer.numberOfNights === 0 || !negotiationOffer.pricePerNight"
+              @click.prevent="submitNegotiationOffer"
             >
               Envoyer ma proposition
             </button>
@@ -495,7 +497,7 @@ console.log(room);
       <!-- Barre d'outils supérieure -->
       <div class="flex justify-between items-center p-4 text-white">
         <div class="text-lg font-medium">{{ currentImageIndex + 1 }} / {{ room.images.length }}</div>
-        <button @click="closeGallery" class="p-2 hover:bg-white hover:bg-opacity-10 rounded-full transition">
+        <button class="p-2 hover:bg-white hover:bg-opacity-10 rounded-full transition" @click="closeGallery">
           <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
           </svg>
@@ -505,8 +507,8 @@ console.log(room);
       <!-- Container de l'image principale -->
       <div class="flex-1 flex items-center justify-center p-4 relative">
         <button 
-          @click="prevImage"
           class="absolute left-4 p-3 bg-black bg-opacity-50 hover:bg-opacity-70 rounded-full text-white transition"
+          @click="prevImage"
         >
           <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
@@ -520,8 +522,8 @@ console.log(room);
         />
         
         <button 
-          @click="nextImage"
           class="absolute right-4 p-3 bg-black bg-opacity-50 hover:bg-opacity-70 rounded-full text-white transition"
+          @click="nextImage"
         >
           <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />

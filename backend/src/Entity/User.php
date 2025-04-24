@@ -9,6 +9,7 @@ use Doctrine\ORM\Mapping as ORM;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
+use Symfony\Component\Serializer\Annotation\Groups;
 
 #[ORM\Entity(repositoryClass: UserRepository::class)]
 #[ORM\Table(name: '`user`')]
@@ -19,84 +20,100 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
+    #[Groups(['user:read', 'favorite:read', 'booking:read', 'offer:read', 'rating:read', 'matching:read'])]
     /**
      * @phpstan-ignore-next-line
      */
     private ?int $id = null;
 
     #[ORM\Column(length: 180)]
+    #[Groups(['user:read', 'favorite:read', 'booking:read', 'offer:read', 'rating:read', 'matching:read'])]
     private ?string $email = null;
 
     /**
      * @var list<string> The user roles
      */
     #[ORM\Column]
+    #[Groups(['user:read'])]
     private array $roles = [];
 
     /**
      * @var string The hashed password
      */
     #[ORM\Column]
+    // Pas de groupe pour le mot de passe, il ne doit jamais être sérialisé
     private ?string $password = null;
 
     #[ORM\Column(length: 255)]
+    #[Groups(['user:read', 'favorite:read', 'booking:read', 'offer:read', 'rating:read', 'matching:read'])]
     private ?string $firstName = null;
 
     #[ORM\Column(length: 255)]
+    #[Groups(['user:read', 'favorite:read', 'booking:read', 'offer:read', 'rating:read', 'matching:read'])]
     private ?string $lastName = null;
 
     #[ORM\ManyToOne(inversedBy: 'owners')]
+    #[Groups(['user:read'])]
     private ?Hotel $hotel = null;
 
     /**
      * @var Collection<int, Booking>
      */
     #[ORM\OneToMany(targetEntity: Booking::class, mappedBy: 'userId')]
+    #[Groups(['user:read'])]
     private Collection $bookings;
 
     /**
      * @var Collection<int, Offer>
      */
     #[ORM\OneToMany(targetEntity: Offer::class, mappedBy: 'userId')]
+    #[Groups(['user:read'])]
     private Collection $offers;
 
     /**
      * @var Collection<int, Rating>
      */
     #[ORM\OneToMany(targetEntity: Rating::class, mappedBy: 'authorId')]
+    #[Groups(['user:read'])]
     private Collection $ratings;
 
     /**
      * @var Collection<int, Matching>
      */
     #[ORM\OneToMany(targetEntity: Matching::class, mappedBy: 'userId')]
+    #[Groups(['user:read'])]
     private Collection $matchings;
 
     /**
      * @var Collection<int, UserPreference>
      */
     #[ORM\OneToMany(targetEntity: UserPreference::class, mappedBy: 'userId')]
+    #[Groups(['user:read'])]
     private Collection $userPreferences;
 
     /**
      * @var Collection<int, Favorite>
      */
     #[ORM\OneToMany(targetEntity: Favorite::class, mappedBy: 'userId')]
+    #[Groups(['user:read'])]
     private Collection $favorites;
 
     /**
      * @var Collection<int, Search>
      */
     #[ORM\OneToMany(targetEntity: Search::class, mappedBy: 'userId')]
+    #[Groups(['user:read'])]
     private Collection $searches;
 
     /**
      * @var Collection<int, UserBadge>
      */
     #[ORM\OneToMany(targetEntity: UserBadge::class, mappedBy: 'userId')]
+    #[Groups(['user:read'])]
     private Collection $userBadges;
 
     #[ORM\Column]
+    #[Groups(['user:read'])]
     private bool $isVerified = false;
 
     #[ORM\Column(length: 255)]

@@ -7,6 +7,7 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Serializer\Annotation\Groups;
 
 #[ORM\Entity(repositoryClass: HotelRepository::class)]
 class Hotel
@@ -14,42 +15,52 @@ class Hotel
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
+    #[Groups(['hotel:read', 'room:read', 'favorite:read', 'user:read'])]
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
+    #[Groups(['hotel:read', 'room:read', 'favorite:read', 'user:read'])]
     private ?string $name = null;
 
     #[ORM\Column(length: 255)]
+    #[Groups(['hotel:read', 'room:read', 'favorite:read'])]
     private ?string $address = null;
 
     #[ORM\Column(length: 255)]
+    #[Groups(['hotel:read', 'room:read', 'favorite:read'])]
     private ?string $city = null;
 
     #[ORM\Column(length: 255)]
+    #[Groups(['hotel:read', 'room:read', 'favorite:read'])]
     private ?string $country = null;
 
     #[ORM\Column(type: Types::TEXT)]
+    #[Groups(['hotel:read'])]
     private ?string $description = null;
 
     /**
      * @var Collection<int, User>
      */
     #[ORM\OneToMany(targetEntity: User::class, mappedBy: 'hotel')]
+    #[Groups(['hotel:read'])]  // Ne pas inclure dans user:read pour éviter circularité
     private Collection $owners;
 
     /**
      * @var Collection<int, Room>
      */
     #[ORM\OneToMany(targetEntity: Room::class, mappedBy: 'hotel')]
+    #[Groups(['hotel:read'])]  // Ne pas inclure dans room:read pour éviter circularité
     private Collection $rooms;
 
     /**
      * @var Collection<int, Favorite>
      */
     #[ORM\OneToMany(targetEntity: Favorite::class, mappedBy: 'hotelId')]
+    #[Groups(['hotel:read'])]  // Ne pas inclure dans favorite:read pour éviter circularité
     private Collection $favorites;
 
     #[ORM\Column(length: 255)]
+    #[Groups(['hotel:read', 'room:read', 'favorite:read'])]
     private ?string $image = null;
 
     public function __construct()

@@ -15,7 +15,7 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Serializer\SerializerInterface;
 
-#[Route('/api/room', name: 'app_refresh_token_')]
+#[Route('/api/room', name: 'app_room_')]
 final class RoomController extends AbstractController
 {
     
@@ -24,25 +24,10 @@ final class RoomController extends AbstractController
     {
         $rooms = $repository->findAll();
     
-        $data = array_map(function (Room $room) {
-            return [
-                'id' => $room->getId(),
-                'name' => $room->getName(),
-                'description' => $room->getDescription(),
-                'pricePerNight' => $room->getPricePerNight(),
-                'capacity' => $room->getCapacity(),
-                'hotelName' => $room->getHotel()->getName(),
-                'service' => $room->getService(),
-                'ambiance' => $room->getAmbiance(),
-                'bookings' => $room->getBookings(),
-                'offers' => $room->getOffers(),
-                'ratings' => $room->getRatings(),
-                'matching' => $room->getMatchings(),
-                'favorites' => $room->getFavorites(),
-            ];
-        }, $rooms);
-    
-        return $this->json($data);
+        // Utiliser les groupes de sérialisation au lieu de mapper manuellement
+        return $this->json($rooms, 200, [], [
+            'groups' => ['room:read']
+        ]);
     }
 
     // Get first 20 rooms
@@ -50,45 +35,19 @@ final class RoomController extends AbstractController
     public function first20(RoomRepository $repository): JsonResponse
     {
         $rooms = $repository->findBy([], null, 20);
-        $data = array_map(function (Room $room) {
-            return [
-                'id' => $room->getId(),
-                'name' => $room->getName(),
-                'description' => $room->getDescription(),
-                'pricePerNight' => $room->getPricePerNight(),
-                'capacity' => $room->getCapacity(),
-                'hotelName' => $room->getHotel()->getName(),
-                'service' => $room->getService(),
-                'ambiance' => $room->getAmbiance(),
-                'bookings' => $room->getBookings(),
-                'offers' => $room->getOffers(),
-                'ratings' => $room->getRatings(),
-                'matching' => $room->getMatchings(),
-                'favorites' => $room->getFavorites(),
-            ];
-        }, $rooms);
         
-        return $this->json($data);
+        // Utiliser les groupes de sérialisation
+        return $this->json($rooms, 200, [], [
+            'groups' => ['room:read']
+        ]);
     }
-    
 
     #[Route('/{id}', name: 'show', methods: ['GET'])]
-    public function show(Room $room, SerializerInterface $serializer): JsonResponse
+    public function show(Room $room): JsonResponse
     {
-        return $this->json([
-            'id' => $room->getId(),
-            'name' => $room->getName(),
-            'description' => $room->getDescription(),
-            'pricePerNight' => $room->getPricePerNight(),
-            'capacity' => $room->getCapacity(),
-            'hotelName' => $room->getHotel()->getName(),
-            'service' => $room->getService(),
-            'ambiance' => $room->getAmbiance(),
-            'bookings' => $room->getBookings(),
-            'offers' => $room->getOffers(),
-            'ratings' => $room->getRatings(),
-            'matching' => $room->getMatchings(),
-            'favorites' => $room->getFavorites(),
+        // Utiliser les groupes de sérialisation
+        return $this->json($room, 200, [], [
+            'groups' => ['room:read']
         ]);
     }
 

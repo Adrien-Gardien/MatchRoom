@@ -19,18 +19,10 @@ final class HotelController extends AbstractController
     {
         $hotels = $repository->findAll();
 
-        $data = array_map(function (Hotel $hotel) {
-            return [
-                'id' => $hotel->getId(),
-                'name' => $hotel->getName(),
-                'address' => $hotel->getAddress(),
-                'city' => $hotel->getCity(),
-                'country' => $hotel->getCountry(),
-                'description' => $hotel->getDescription(),
-            ];
-        }, $hotels);
-
-        return $this->json($data);
+        // Utiliser les groupes de sérialisation
+        return $this->json($hotels, 200, [], [
+            'groups' => ['hotel:read']
+        ]);
     }
 
     // first 20 hotels
@@ -56,39 +48,9 @@ final class HotelController extends AbstractController
     #[Route('/{id}', name: 'show', methods: ['GET'])]
     public function show(Hotel $hotel): JsonResponse
     {
-        $rooms = [];
-    
-        foreach ($hotel->getRooms() as $room) {
-            $rooms[] = [
-                'id' => $room->getId(),
-                'name' => $room->getName(),
-                'description' => $room->getDescription(),
-                'price' => $room->getPricePerNight(),
-                'capacity' => $room->getCapacity(),
-            ];
-        }
-    
-        $favorites = [];
-    
-        foreach ($hotel->getFavorites() as $favorite) {
-            $favorites[] = [
-                'id' => $favorite->getId(),
-                'userId' => $favorite->getUserId()?->getId(),
-                'addedDate' => $favorite->getAddedDate()->format('Y-m-d H:i:s'),
-                'hotelId' => $favorite->getHotelId()?->getId(),
-                'roomId' => $favorite->getRoomId()?->getId(),
-            ];
-        }
-    
-        return $this->json([
-            'id' => $hotel->getId(),
-            'name' => $hotel->getName(),
-            'address' => $hotel->getAddress(),
-            'city' => $hotel->getCity(),
-            'country' => $hotel->getCountry(),
-            'description' => $hotel->getDescription(),
-            'favorites' => $favorites,
-            'rooms' => $rooms,
+        // Utiliser les groupes de sérialisation
+        return $this->json($hotel, 200, [], [
+            'groups' => ['hotel:read']
         ]);
     }
     

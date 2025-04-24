@@ -5,6 +5,7 @@ namespace App\Entity;
 use App\Repository\FavoriteRepository;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Serializer\Annotation\Groups;
 
 #[ORM\Entity(repositoryClass: FavoriteRepository::class)]
 class Favorite
@@ -12,18 +13,23 @@ class Favorite
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
+    #[Groups(['favorite:read', 'user:read', 'hotel:read', 'room:read'])]
     private ?int $id = null;
 
     #[ORM\Column(type: Types::DATETIME_MUTABLE)]
+    #[Groups(['favorite:read', 'user:read', 'hotel:read', 'room:read'])]
     private ?\DateTimeInterface $addedDate = null;
 
     #[ORM\ManyToOne(inversedBy: 'favorites')]
+    #[Groups(['favorite:read'])]  // Ne pas inclure dans user:read pour éviter circularité
     private ?User $userId = null;
 
     #[ORM\ManyToOne(inversedBy: 'favorites')]
+    #[Groups(['favorite:read', 'user:read'])]  // Ne pas inclure dans hotel:read pour éviter circularité
     private ?Hotel $hotelId = null;
 
     #[ORM\ManyToOne(inversedBy: 'favorites')]
+    #[Groups(['favorite:read', 'user:read'])]  // Ne pas inclure dans room:read pour éviter circularité
     private ?Room $roomId = null;
 
     public function getId(): ?int
