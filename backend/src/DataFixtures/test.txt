@@ -1,0 +1,49 @@
+<?php
+//
+//namespace App\DataFixtures;
+//
+//use App\Entity\Booking;
+//use App\Entity\User;
+//use App\Entity\Room;
+//use Doctrine\Bundle\FixturesBundle\Fixture;
+//use Doctrine\Persistence\ObjectManager;
+//use Faker\Factory;
+//
+//class BookingFixtures extends Fixture
+//{
+//    public function load(ObjectManager $manager): void
+//    {
+//        $faker = Factory::create('fr_FR');
+//
+//        $users = $manager->getRepository(User::class)->findAll();
+//        $rooms = $manager->getRepository(Room::class)->findAll();
+//
+//        if (empty($users) || empty($rooms)) {
+//            throw new \Exception("Pas assez de données en base pour générer les réservations.");
+//        }
+//
+//        for ($i = 0; $i < 150; $i++) {
+//            $booking = new Booking();
+//
+//            $startDate = $faker->dateTimeBetween('-6 months', '+3 months');
+//            $endDate = (clone $startDate)->modify('+' . rand(1, 14) . ' days');
+//
+//            $room = $faker->randomElement($rooms);
+//            $pricePerNight = $room->getPricePerNight();
+//            $nbNights = $startDate->diff($endDate)->days;
+//            $totalPrice = $nbNights * $pricePerNight;
+//
+//            $booking->setStartDate($startDate);
+//            $booking->setEndDate($endDate);
+//            $booking->setTotalPrice(number_format($totalPrice, 2, '.', ''));
+//            $booking->setStatus('jsp ce quil faut mettre en fixture');
+//
+//            $booking->setUserId($faker->randomElement($users));
+//            $booking->setRoomId($room);
+//
+//            $manager->persist($booking);
+//        }
+//
+//        $manager->flush();
+//    }
+//}
