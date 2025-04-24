@@ -10,7 +10,7 @@ use Doctrine\Migrations\AbstractMigration;
 /**
  * Auto-generated Migration: Please modify to your needs!
  */
-final class Version20250423083643 extends AbstractMigration
+final class Version20250423140216 extends AbstractMigration
 {
     public function getDescription(): string
     {
@@ -48,7 +48,7 @@ final class Version20250423083643 extends AbstractMigration
             CREATE INDEX IDX_68C58ED935F83FFC ON favorite (room_id_id)
         SQL);
         $this->addSql(<<<'SQL'
-            CREATE TABLE hotel (id SERIAL NOT NULL, name VARCHAR(255) NOT NULL, address VARCHAR(255) NOT NULL, city VARCHAR(255) NOT NULL, country VARCHAR(255) NOT NULL, description TEXT NOT NULL, PRIMARY KEY(id))
+            CREATE TABLE hotel (id SERIAL NOT NULL, name VARCHAR(255) NOT NULL, address VARCHAR(255) NOT NULL, city VARCHAR(255) NOT NULL, country VARCHAR(255) NOT NULL, description TEXT NOT NULL, image VARCHAR(255) NOT NULL, PRIMARY KEY(id))
         SQL);
         $this->addSql(<<<'SQL'
             CREATE TABLE matching (id SERIAL NOT NULL, user_id_id INT DEFAULT NULL, room_id_id INT DEFAULT NULL, type BOOLEAN NOT NULL, match_date TIMESTAMP(0) WITHOUT TIME ZONE NOT NULL, PRIMARY KEY(id))
@@ -76,6 +76,15 @@ final class Version20250423083643 extends AbstractMigration
         SQL);
         $this->addSql(<<<'SQL'
             CREATE INDEX IDX_D889262235F83FFC ON rating (room_id_id)
+        SQL);
+        $this->addSql(<<<'SQL'
+            CREATE TABLE refresh_token (id VARCHAR(36) NOT NULL, user_id INT NOT NULL, token VARCHAR(255) NOT NULL, expires_at TIMESTAMP(0) WITHOUT TIME ZONE NOT NULL, PRIMARY KEY(id))
+        SQL);
+        $this->addSql(<<<'SQL'
+            CREATE UNIQUE INDEX UNIQ_C74F21955F37A13B ON refresh_token (token)
+        SQL);
+        $this->addSql(<<<'SQL'
+            CREATE INDEX IDX_C74F2195A76ED395 ON refresh_token (user_id)
         SQL);
         $this->addSql(<<<'SQL'
             CREATE TABLE room (id SERIAL NOT NULL, hotel_id INT DEFAULT NULL, name VARCHAR(255) NOT NULL, description TEXT NOT NULL, price_per_night NUMERIC(10, 2) NOT NULL, capacity INT NOT NULL, PRIMARY KEY(id))
@@ -115,6 +124,15 @@ final class Version20250423083643 extends AbstractMigration
         SQL);
         $this->addSql(<<<'SQL'
             CREATE UNIQUE INDEX UNIQ_723705D1EE3863E2 ON transaction (booking_id_id)
+        SQL);
+        $this->addSql(<<<'SQL'
+            CREATE TABLE "user" (id SERIAL NOT NULL, hotel_id INT DEFAULT NULL, email VARCHAR(180) NOT NULL, roles JSON NOT NULL, password VARCHAR(255) NOT NULL, first_name VARCHAR(255) NOT NULL, last_name VARCHAR(255) NOT NULL, PRIMARY KEY(id))
+        SQL);
+        $this->addSql(<<<'SQL'
+            CREATE INDEX IDX_8D93D6493243BB18 ON "user" (hotel_id)
+        SQL);
+        $this->addSql(<<<'SQL'
+            CREATE UNIQUE INDEX UNIQ_IDENTIFIER_EMAIL ON "user" (email)
         SQL);
         $this->addSql(<<<'SQL'
             CREATE TABLE user_badge (id SERIAL NOT NULL, user_id_id INT DEFAULT NULL, badge_id_id INT DEFAULT NULL, awarded_date TIMESTAMP(0) WITHOUT TIME ZONE NOT NULL, PRIMARY KEY(id))
@@ -183,6 +201,9 @@ final class Version20250423083643 extends AbstractMigration
             ALTER TABLE rating ADD CONSTRAINT FK_D889262235F83FFC FOREIGN KEY (room_id_id) REFERENCES room (id) NOT DEFERRABLE INITIALLY IMMEDIATE
         SQL);
         $this->addSql(<<<'SQL'
+            ALTER TABLE refresh_token ADD CONSTRAINT FK_C74F2195A76ED395 FOREIGN KEY (user_id) REFERENCES "user" (id) NOT DEFERRABLE INITIALLY IMMEDIATE
+        SQL);
+        $this->addSql(<<<'SQL'
             ALTER TABLE room ADD CONSTRAINT FK_729F519B3243BB18 FOREIGN KEY (hotel_id) REFERENCES hotel (id) NOT DEFERRABLE INITIALLY IMMEDIATE
         SQL);
         $this->addSql(<<<'SQL'
@@ -202,6 +223,9 @@ final class Version20250423083643 extends AbstractMigration
         SQL);
         $this->addSql(<<<'SQL'
             ALTER TABLE transaction ADD CONSTRAINT FK_723705D1EE3863E2 FOREIGN KEY (booking_id_id) REFERENCES booking (id) NOT DEFERRABLE INITIALLY IMMEDIATE
+        SQL);
+        $this->addSql(<<<'SQL'
+            ALTER TABLE "user" ADD CONSTRAINT FK_8D93D6493243BB18 FOREIGN KEY (hotel_id) REFERENCES hotel (id) NOT DEFERRABLE INITIALLY IMMEDIATE
         SQL);
         $this->addSql(<<<'SQL'
             ALTER TABLE user_badge ADD CONSTRAINT FK_1C32B3459D86650F FOREIGN KEY (user_id_id) REFERENCES "user" (id) NOT DEFERRABLE INITIALLY IMMEDIATE
@@ -224,15 +248,6 @@ final class Version20250423083643 extends AbstractMigration
         $this->addSql(<<<'SQL'
             ALTER TABLE user_preference_service ADD CONSTRAINT FK_2D357339ED5CA9E6 FOREIGN KEY (service_id) REFERENCES service (id) ON DELETE CASCADE NOT DEFERRABLE INITIALLY IMMEDIATE
         SQL);
-        $this->addSql(<<<'SQL'
-            ALTER TABLE "user" ADD hotel_id INT DEFAULT NULL
-        SQL);
-        $this->addSql(<<<'SQL'
-            ALTER TABLE "user" ADD CONSTRAINT FK_8D93D6493243BB18 FOREIGN KEY (hotel_id) REFERENCES hotel (id) NOT DEFERRABLE INITIALLY IMMEDIATE
-        SQL);
-        $this->addSql(<<<'SQL'
-            CREATE INDEX IDX_8D93D6493243BB18 ON "user" (hotel_id)
-        SQL);
     }
 
     public function down(Schema $schema): void
@@ -240,9 +255,6 @@ final class Version20250423083643 extends AbstractMigration
         // this down() migration is auto-generated, please modify it to your needs
         $this->addSql(<<<'SQL'
             CREATE SCHEMA public
-        SQL);
-        $this->addSql(<<<'SQL'
-            ALTER TABLE "user" DROP CONSTRAINT FK_8D93D6493243BB18
         SQL);
         $this->addSql(<<<'SQL'
             ALTER TABLE booking DROP CONSTRAINT FK_E00CEDDE9D86650F
@@ -278,6 +290,9 @@ final class Version20250423083643 extends AbstractMigration
             ALTER TABLE rating DROP CONSTRAINT FK_D889262235F83FFC
         SQL);
         $this->addSql(<<<'SQL'
+            ALTER TABLE refresh_token DROP CONSTRAINT FK_C74F2195A76ED395
+        SQL);
+        $this->addSql(<<<'SQL'
             ALTER TABLE room DROP CONSTRAINT FK_729F519B3243BB18
         SQL);
         $this->addSql(<<<'SQL'
@@ -297,6 +312,9 @@ final class Version20250423083643 extends AbstractMigration
         SQL);
         $this->addSql(<<<'SQL'
             ALTER TABLE transaction DROP CONSTRAINT FK_723705D1EE3863E2
+        SQL);
+        $this->addSql(<<<'SQL'
+            ALTER TABLE "user" DROP CONSTRAINT FK_8D93D6493243BB18
         SQL);
         $this->addSql(<<<'SQL'
             ALTER TABLE user_badge DROP CONSTRAINT FK_1C32B3459D86650F
@@ -344,6 +362,9 @@ final class Version20250423083643 extends AbstractMigration
             DROP TABLE rating
         SQL);
         $this->addSql(<<<'SQL'
+            DROP TABLE refresh_token
+        SQL);
+        $this->addSql(<<<'SQL'
             DROP TABLE room
         SQL);
         $this->addSql(<<<'SQL'
@@ -362,6 +383,9 @@ final class Version20250423083643 extends AbstractMigration
             DROP TABLE transaction
         SQL);
         $this->addSql(<<<'SQL'
+            DROP TABLE "user"
+        SQL);
+        $this->addSql(<<<'SQL'
             DROP TABLE user_badge
         SQL);
         $this->addSql(<<<'SQL'
@@ -372,12 +396,6 @@ final class Version20250423083643 extends AbstractMigration
         SQL);
         $this->addSql(<<<'SQL'
             DROP TABLE user_preference_service
-        SQL);
-        $this->addSql(<<<'SQL'
-            DROP INDEX IDX_8D93D6493243BB18
-        SQL);
-        $this->addSql(<<<'SQL'
-            ALTER TABLE "user" DROP hotel_id
         SQL);
     }
 }
