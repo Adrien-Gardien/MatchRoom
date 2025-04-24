@@ -20,8 +20,12 @@ class Offer
     #[ORM\Column(length: 255)]
     private ?string $status = null;
 
+// Par ceci :
     #[ORM\Column(type: Types::DATE_MUTABLE)]
-    private ?\DateTimeInterface $offerDate = null;
+    private ?\DateTimeInterface $startDate = null;
+
+    #[ORM\Column(type: Types::DATE_MUTABLE)]
+    private ?\DateTimeInterface $endDate = null;
 
     #[ORM\ManyToOne(inversedBy: 'offers')]
     private ?User $userId = null;
@@ -58,17 +62,28 @@ class Offer
         return $this;
     }
 
-    public function getOfferDate(): ?\DateTimeInterface
+    public function getStartDate(): ?\DateTimeInterface
     {
-        return $this->offerDate;
+        return $this->startDate;
     }
 
-    public function setOfferDate(\DateTimeInterface $offerDate): static
+    public function setStartDate(\DateTimeInterface $startDate): static
     {
-        $this->offerDate = $offerDate;
-
+        $this->startDate = $startDate;
         return $this;
     }
+
+    public function getEndDate(): ?\DateTimeInterface
+    {
+        return $this->endDate;
+    }
+
+    public function setEndDate(\DateTimeInterface $endDate): static
+    {
+        $this->endDate = $endDate;
+        return $this;
+    }
+
 
     public function getUserId(): ?User
     {
