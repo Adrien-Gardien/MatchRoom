@@ -49,8 +49,6 @@ const fetchRoom = async () => {
     isLoading.value = true;
     const response = await $fetch(`/api/room/${id}`);
 
-    console.log("Réponse de l'API:", response);
-
     room.value = response;
     error.value = null;
 

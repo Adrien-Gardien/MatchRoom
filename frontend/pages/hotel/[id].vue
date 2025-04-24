@@ -1,76 +1,93 @@
-<script setup>
+<script setup lang="ts">
 import { ref, onMounted } from 'vue';
+import { useRoute, useRouter } from 'vue-router';
+import { useAuthStore } from '@/stores/auth';
 
 const route = useRoute();
-const id = route.params.id;
+const router = useRouter();
+const authStore = useAuthStore();
+const id = route.params.id as string;
 
-// Données factices pour l'hôtel
-const hotel = ref({
-  id: id,
-  name: "Hôtel Le Magnifique",
-  address: "123 Avenue des Champs-Élysées",
-  city: "Paris",
-  country: "France",
-  description: "Situé au cœur de Paris, l'Hôtel Le Magnifique offre une expérience de séjour exceptionnelle. Avec sa façade historique, ses chambres élégantes et son service personnalisé, notre établissement combine le charme parisien classique avec le confort moderne. Profitez de notre restaurant gastronomique, de notre spa de luxe et de notre vue imprenable sur la ville. À quelques pas des principales attractions touristiques, des boutiques de luxe et des restaurants renommés, l'Hôtel Le Magnifique est l'endroit idéal pour découvrir la Ville Lumière."
-});
-
-// Données factices pour les chambres
-const rooms = ref([
-  {
-    id: 1,
-    name: "Chambre Classique",
-    description: "Chambre confortable avec vue sur la cour intérieure, lit double et salle de bain privative.",
-    price: 150
-  },
-  {
-    id: 2,
-    name: "Suite Junior",
-    description: "Suite spacieuse avec salon séparé, lit king-size et grande salle de bain avec baignoire.",
-    price: 250
-  },
-  {
-    id: 3,
-    name: "Suite Présidentielle",
-    description: "Notre suite la plus luxueuse avec vue panoramique, salon, salle à manger et jacuzzi privé.",
-    price: 500
-  },
-  {
-    id: 4,
-    name: "Chambre Familiale",
-    description: "Chambre spacieuse pouvant accueillir jusqu'à 4 personnes avec 2 lits doubles.",
-    price: 220
-  },
-  {
-    id: 5,
-    name: "Chambre Deluxe",
-    description: "Chambre élégante avec balcon privé, lit queen-size et salle de bain en marbre.",
-    price: 180
-  }
-]);
-
+const hotel = ref<any>(null);
+const rooms = ref<any[]>([]);
+const error = ref<string | null>(null);
+const favoriteId = ref<number | null>(null);
 const isLoading = ref(true);
-const error = ref(null);
-const isHotelFavorite = ref(false);
 const isFavorite = ref(false);
 
-// Fonctions 
-const toggleFavorite = () => {
-  isFavorite.value = !isFavorite.value;
-  // Simulation d'API call
-  console.log(`Hotel ${id} ${isFavorite.value ? 'ajouté aux' : 'retiré des'} favoris`);
+
+const fetchHotel = async () => {
+  const apiUrl = useRuntimeConfig().public.apiUrl || 'http://localhost';
+
+  try {
+    const data = await $fetch(`${apiUrl}/api/hotel/${id}`, {
+      credentials: 'include',
+    });
+    hotel.value = data;
+    rooms.value = data.rooms || [];
+
+    if (authStore.user && data.favorites) {
+      const existing = data.favorites.find((f: any) => f.userId === authStore.user.id);
+      if (existing) {
+        isFavorite.value = true;
+        favoriteId.value = existing.id;
+      }
+    }
+  } catch (err: any) {
+    console.error('Erreur fetch:', err);
+    error.value = err?.message || 'Erreur inconnue';
+  } finally {
+    isLoading.value = false;
+  }
+};
+
+const toggleFavorite = async () => {
+  const apiUrl = useRuntimeConfig().public.apiUrl || 'http://localhost';
+
+  if (!authStore.user) {
+    alert('Vous devez être connecté pour ajouter aux favoris.');
+    return;
+  }
+
+  try {
+    if (isFavorite.value && favoriteId.value !== null) {
+      await $fetch(`${apiUrl}/api/favorite/${favoriteId.value}`, {
+        method: 'DELETE',
+        credentials: 'include',
+      });
+      isFavorite.value = false;
+      favoriteId.value = null;
+    } else {
+      await $fetch(`${apiUrl}/api/favorite`, {
+        method: 'POST',
+        credentials: 'include',
+        body: {
+          userId: authStore.user.id,
+          hotelId: hotel.value?.id,
+          addedDate: new Date().toISOString(),
+        },
+      });
+
+      isFavorite.value = true;
+      await fetchHotel();
+    }
+  } catch (err: any) {
+    console.error('Erreur lors du toggle favori :', err);
+  }
+};
+
+
+const sendContactRequest = () => {
+  alert('Message envoyé !');
+};
+
+const navigateToHome = () => {
+  router.push('/');
 };
 
 onMounted(() => {
-  // Simulation d'un temps de chargement
-  setTimeout(() => {
-    isLoading.value = false;
-  }, 1000);
+  fetchHotel();
 });
-
-const sendContactRequest = () => {
-  // Simulation d'envoi du formulaire
-  alert('Votre message a été envoyé (simulation)');
-}
 </script>
 
 
@@ -109,7 +126,7 @@ const sendContactRequest = () => {
       
       <div class="absolute top-4 right-4">
         <button 
-          @click="toggleFavorite" 
+          @click="toggleFavorite"
           class="flex items-center justify-center p-2 rounded-full bg-white shadow-md hover:bg-gray-100 transition-colors"
           :class="{ 'text-red-500': isFavorite, 'text-gray-400': !isFavorite }"
         >

@@ -36,6 +36,30 @@ final class HotelController extends AbstractController
     #[Route('/{id}', name: 'show', methods: ['GET'])]
     public function show(Hotel $hotel): JsonResponse
     {
+        $rooms = [];
+    
+        foreach ($hotel->getRooms() as $room) {
+            $rooms[] = [
+                'id' => $room->getId(),
+                'name' => $room->getName(),
+                'description' => $room->getDescription(),
+                'price' => $room->getPricePerNight(),
+                'capacity' => $room->getCapacity(),
+            ];
+        }
+    
+        $favorites = [];
+    
+        foreach ($hotel->getFavorites() as $favorite) {
+            $favorites[] = [
+                'id' => $favorite->getId(),
+                'userId' => $favorite->getUserId()?->getId(),
+                'addedDate' => $favorite->getAddedDate()->format('Y-m-d H:i:s'),
+                'hotelId' => $favorite->getHotelId()?->getId(),
+                'roomId' => $favorite->getRoomId()?->getId(),
+            ];
+        }
+    
         return $this->json([
             'id' => $hotel->getId(),
             'name' => $hotel->getName(),
@@ -43,9 +67,12 @@ final class HotelController extends AbstractController
             'city' => $hotel->getCity(),
             'country' => $hotel->getCountry(),
             'description' => $hotel->getDescription(),
+            'favorites' => $favorites,
+            'rooms' => $rooms,
         ]);
     }
-
+    
+    
     #[Route('', name: 'create', methods: ['POST'])]
     public function create(Request $request, EntityManagerInterface $em): JsonResponse
     {
