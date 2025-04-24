@@ -3,6 +3,7 @@
 namespace App\Controller;
 
 use App\Entity\RefreshToken;
+use App\Entity\Room;
 use App\Repository\RefreshTokenRepository;
 use App\Repository\UserRepository;
 use Doctrine\ORM\EntityManagerInterface;
@@ -11,11 +12,12 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\Serializer\SerializerInterface;
 
 #[Route('/api/room', name: 'app_refresh_token_')]
 final class RoomController extends AbstractController
 {
-    #[Route('', name: 'index', methods: ['GET'])]
+    #[Route('/', name: 'index', methods: ['GET'])]
     public function index(RefreshTokenRepository $repository): JsonResponse
     {
         $tokens = $repository->findAll();
@@ -33,17 +35,26 @@ final class RoomController extends AbstractController
     }
 
     #[Route('/{id}', name: 'show', methods: ['GET'])]
-    public function show(RefreshToken $token): JsonResponse
+    public function show(Room $room, SerializerInterface $serializer): JsonResponse
     {
         return $this->json([
-            'id' => $token->getId(),
-            'token' => $token->getToken(),
-            'expiresAt' => $token->getExpiresAt()?->format('Y-m-d H:i:s'),
-            'userId' => $token->getUser()?->getId(),
+            'id' => $room->getId(),
+            'name' => $room->getName(),
+            'description' => $room->getDescription(),
+            'pricePerNight' => $room->getPricePerNight(),
+            'capacity' => $room->getCapacity(),
+            'hotelName' => $room->getHotel()->getName(),
+            'service' => $room->getService(),
+            'ambiance' => $room->getAmbiance(),
+            'bookings' => $room->getBookings(),
+            'offers' => $room->getOffers(),
+            'ratings' => $room->getRatings(),
+            'matching' => $room->getMatchings(),
+            'favorites' => $room->getFavorites(),
         ]);
     }
 
-    #[Route('', name: 'create', methods: ['POST'])]
+    #[Route('/', name: 'create', methods: ['POST'])]
     public function create(
         Request $request,
         EntityManagerInterface $em,
