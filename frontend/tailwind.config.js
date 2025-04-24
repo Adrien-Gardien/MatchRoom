@@ -5,6 +5,21 @@ export default {
     theme: {
         extend: {
             colors: {
+                'colonial-white': '#FFEEBC',
+                'everglade': '#26422A',
+                'burning-orange': '#EA672D',
+                'hawkes-blue': '#D2E8FF',
+                'quincy': '#5D372A',
+                'colonial-white-light': '#FFF4D6',
+                'colonial-white-dark': '#F5E0A0',
+                'everglade-light': '#335A3A',
+                'everglade-dark': '#1A2E1D',
+                'burning-orange-light': '#F2845A',
+                'burning-orange-dark': '#CC4E1A',
+                'hawkes-blue-light': '#E9F5FF',
+                'hawkes-blue-dark': '#B0D6FF',
+                'quincy-light': '#7A4C3D',
+                'quincy-dark': '#42271D',
                 brand: {
                     25: 'var(--brand-25)',
                     50: 'var(--brand-50)',
