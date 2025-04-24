@@ -23,13 +23,14 @@
         
         <!-- Cards container -->
         <div 
-          class="flex transition-transform duration-300 " 
+          class="flex transition-transform duration-300" 
           :style="{ transform: `translateX(-${currentSlide * (100 / visibleSlides)}%)` }"
         >
           <div 
             v-for="(room, index) in rooms" 
             :key="index"
-            class="w-full md:w-1/2 lg:w-1/4 flex-shrink-0 px-3 rounded-b-3xl"
+            class="w-full md:w-1/2 lg:w-1/4 flex-shrink-0 px-3 rounded-b-3xl cursor-pointer"
+            @click="navigateToRoom(room.id)"
           >
             <div class="relative bg-transparent rounded-3xl overflow-hidden shadow-md room-card">
               <!-- Image couvrant toute la card -->
@@ -75,6 +76,14 @@
 
 <script setup>
 import { ref, computed, onMounted, onUnmounted } from 'vue';
+import { useRouter } from 'vue-router';
+
+const router = useRouter();
+
+const navigateToRoom = (roomId) => {
+  console.log("roomId", roomId);
+  router.push(`/room/${roomId}`);
+};
 
 const props = defineProps({
   title: {

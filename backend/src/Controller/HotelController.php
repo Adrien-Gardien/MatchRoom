@@ -33,6 +33,26 @@ final class HotelController extends AbstractController
         return $this->json($data);
     }
 
+    // first 20 hotels
+    #[Route('/first-20', name: 'first-20', methods: ['GET'])]
+    public function first20(HotelRepository $repository): JsonResponse
+    {
+        $hotels = $repository->findBy([], null, 20);
+        $data = array_map(function (Hotel $hotel) {
+            return [
+                'id' => $hotel->getId(),
+                'name' => $hotel->getName(),
+                'address' => $hotel->getAddress(),
+                'city' => $hotel->getCity(),
+                'country' => $hotel->getCountry(),
+                'description' => $hotel->getDescription(),
+                'image' => $hotel->getImage(),
+            ];
+        }, $hotels);
+
+        return $this->json($data);
+    }
+
     #[Route('/{id}', name: 'show', methods: ['GET'])]
     public function show(Hotel $hotel): JsonResponse
     {
