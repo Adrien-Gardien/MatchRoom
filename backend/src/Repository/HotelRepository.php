@@ -16,6 +16,24 @@ class HotelRepository extends ServiceEntityRepository
         parent::__construct($registry, Hotel::class);
     }
 
+    public function findByFilters(?string $city, ?string $country): array
+    {
+        $qb = $this->createQueryBuilder('h');
+
+        if ($city) {
+            $qb->andWhere('LOWER(h.city) LIKE :city')
+                ->setParameter('city', '%' . strtolower($city) . '%');
+        }
+
+        if ($country) {
+            $qb->andWhere('LOWER(h.country) LIKE :country')
+                ->setParameter('country', '%' . strtolower($country) . '%');
+        }
+
+        return $qb->getQuery()->getResult();
+    }
+
+
 //    /**
 //     * @return Hotel[] Returns an array of Hotel objects
 //     */

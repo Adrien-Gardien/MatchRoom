@@ -87,6 +87,9 @@ class Room
     #[Groups(['room:read'])]
     private Collection $favorites;
 
+    #[ORM\Column(length: 255, nullable: true)]
+    private ?string $image = null;
+
     public function __construct()
     {
         $this->service = new ArrayCollection();
@@ -357,6 +360,18 @@ class Room
                 $favorite->setRoomId(null);
             }
         }
+
+        return $this;
+    }
+
+    public function getImage(): ?string
+    {
+        return $this->image;
+    }
+
+    public function setImage(string $image): static
+    {
+        $this->image = $image;
 
         return $this;
     }

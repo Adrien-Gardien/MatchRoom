@@ -15,9 +15,12 @@ use Symfony\Component\Routing\Attribute\Route;
 final class HotelController extends AbstractController
 {
     #[Route('', name: 'index', methods: ['GET'])]
-    public function index(HotelRepository $repository): JsonResponse
+    public function index(Request $request, HotelRepository $repository): JsonResponse
     {
-        $hotels = $repository->findAll();
+        $city = $request->query->get('city');
+        $country = $request->query->get('country');
+
+        $hotels = $repository->findByFilters($city, $country);
 
         // Utiliser les groupes de sérialisation
         return $this->json($hotels, 200, [], [

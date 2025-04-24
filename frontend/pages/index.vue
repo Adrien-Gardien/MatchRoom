@@ -1008,15 +1008,14 @@
         }
     }
 
-    @keyframes fade-in-delayed {
-        0%,
-        30% {
-            opacity: 0;
-        }
-        100% {
-            opacity: 1;
-        }
-    }
+@keyframes fade-in-delayed {
+  0%, 30% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
+}
 
     .animate-subtle-zoom {
         animation: subtle-zoom 15s infinite alternate ease-in-out;

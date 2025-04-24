@@ -109,8 +109,10 @@ onMounted(() => {
     <div class="relative">
       <div class="bg-gray-100 rounded-lg overflow-hidden">
         <div class="relative h-64 md:h-80">
-          <!-- Image placeholder - à remplacer par l'image réelle de l'hôtel -->
-          <div class="absolute inset-0 bg-gradient-to-r from-blue-500 to-purple-600"></div>
+          <div
+              class="absolute inset-0"
+              :style="`background-image: url('${hotel.image}'); background-size: cover; background-position: center;`">
+          </div>
           <div class="absolute inset-0 bg-black opacity-40"></div>
           <div class="absolute bottom-0 left-0 p-6 text-white">
             <h1 class="text-3xl md:text-4xl font-bold">{{ hotel.name }}</h1>
@@ -154,7 +156,9 @@ onMounted(() => {
             
             <div v-else class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               <div v-for="room in rooms" :key="room.id" class="border rounded-lg overflow-hidden transition-transform hover:scale-105">
-                <div class="h-48 bg-gray-200"></div>
+                <div class="h-48 bg-gray-200"
+                     :style="`background-image: url('${room.image}'); background-size: cover; background-position: center;`">
+                </div>
                 <div class="p-4">
                   <h3 class="font-semibold text-lg mb-2">{{ room.name || 'Chambre' }}</h3>
                   <p class="text-gray-700 text-sm mb-4">{{ room.description || 'Description non disponible' }}</p>
