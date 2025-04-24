@@ -43,7 +43,7 @@ const fetchRooms = async () => {
   } catch (err) {
     console.error(err);
     error.value = "Erreur lors du chargement des données de la chambre.";
-  } 
+  }
 };
 
 const fetchHotels = async () => {
@@ -120,7 +120,7 @@ const formattedHotels = computed(() => {
         <p class="text-lg sm:text-xl md:text-2xl text-center max-w-3xl mb-8 animate-slide-up">
           Proposez votre prix pour des chambres d'hôtel de luxe et économisez jusqu'à 40%
         </p>
-        
+
         <button class="px-6 py-3 bg-hawkes-blue hover:bg-hawkes-blue-light text-black rounded-xl shadow-lg transition transform hover:scale-105 mb-12">
           Matcher ma room
         </button>
@@ -131,7 +131,7 @@ const formattedHotels = computed(() => {
     <div class="relative -mt-12 z-30 flex justify-center px-4">
       <div class="w-full max-w-4xl bg-[#FFF9E9]/80 shadow-lg rounded-xl overflow-hidden backdrop-blur-sm">
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 divide-y sm:divide-y-0 sm:divide-x divide-colonial-white-dark">
-          
+
           <!-- Destination -->
           <div class="p-3 text-center">
             <p class="text-quincy-light text-sm mb-1">Destination</p>
@@ -143,10 +143,10 @@ const formattedHotels = computed(() => {
             <p class="text-quincy-light text-sm mb-1">Date de départ</p>
             <div class="relative w-full">
               <div class="flex items-center justify-center">
-                <input 
-                  v-model="searchDates.checkIn" 
-                  type="date" 
-                  :min="today" 
+                <input
+                  v-model="searchDates.checkIn"
+                  type="date"
+                  :min="today"
                   class="w-full text-sm bg-transparent border-0 focus:ring-0 text-quincy placeholder:text-gray-400 opacity-0 absolute inset-0 cursor-pointer z-10"
                 />
                 <div class="flex items-center space-x-2 w-full justify-center">
@@ -167,10 +167,10 @@ const formattedHotels = computed(() => {
             <p class="text-quincy-light text-sm mb-1">Date d'arrivée</p>
             <div class="relative w-full">
               <div class="flex items-center justify-center">
-                <input 
-                  v-model="searchDates.checkOut" 
-                  type="date" 
-                  :min="minCheckoutDate" 
+                <input
+                  v-model="searchDates.checkOut"
+                  type="date"
+                  :min="minCheckoutDate"
                   class="w-full text-sm bg-transparent border-0 focus:ring-0 text-quincy placeholder:text-gray-400 opacity-0 absolute inset-0 cursor-pointer z-10"
                   :disabled="!searchDates.checkIn"
                 />
@@ -202,7 +202,7 @@ const formattedHotels = computed(() => {
       </div>
     </div>
 
-    
+
     <!-- Section H2 avec image et stats -->
     <div class="py-16 bg-cream">
       <div class="container mx-auto px-4 sm:px-6 lg:px-8">
@@ -211,27 +211,27 @@ const formattedHotels = computed(() => {
             <!-- Placeholder pour l'image -->
             <div class="w-full h-full bg-hawkes-blue-light bg-[url('https://images.unsplash.com/photo-1582719508461-905c673771fd?q=80&w=1500&auto=format&fit=crop')]  bg-cover bg-center"></div>
           </div>
-          
+
           <div>
             <h2 class="text-3xl sm:text-4xl font-bold mb-8 text-everglade">
               Une nouvelle façon de réserver
             </h2>
-            
+
             <p class="text-quincy mb-10">
               MatchRoom révolutionne le monde de l'hôtellerie en vous permettant de faire des offres directement aux établissements. Négociez votre tarif idéal pour des chambres d'exception et obtenez des réductions exclusives sur des hôtels qui correspondent exactement à vos attentes.
             </p>
-            
+
             <div class="grid grid-cols-3 gap-8">
               <div class="text-center">
                 <p class="text-3xl font-bold text-burning-orange mb-2">40%</p>
                 <p class="text-quincy-light text-sm">D'économies moyennes sur vos réservations</p>
               </div>
-              
+
               <div class="text-center">
                 <p class="text-3xl font-bold text-burning-orange mb-2">2h</p>
                 <p class="text-quincy-light text-sm">Temps de réponse moyen des hôteliers</p>
               </div>
-              
+
               <div class="text-center">
                 <p class="text-3xl font-bold text-burning-orange mb-2">92%</p>
                 <p class="text-quincy-light text-sm">De nos clients satisfaits recommandent MatchRoom</p>
@@ -241,23 +241,23 @@ const formattedHotels = computed(() => {
         </div>
       </div>
     </div>
-    
+
     <!-- Section H2 avec descriptif -->
     <div class="py-16 bg-cream">
       <div class="container mx-auto px-4 sm:px-6 lg:px-8">
         <h2 class="text-3xl sm:text-4xl font-bold mb-4 text-everglade">
           Découvrez nos établissements partenaires
         </h2>
-        
+
         <p class="text-quincy mb-10">
           Des hôtels de charme aux palaces prestigieux, nous avons sélectionné les meilleurs établissements pour garantir une expérience inoubliable.<br>
           Chaque partenaire est rigoureusement choisi pour la qualité de son service et son cadre exceptionnel.
         </p>
-        
+
         <!-- Cartes H4 -->
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 mb-20">
-          <HotelCard 
-            v-for="hotel in formattedHotels.slice(0, 6)" 
+          <HotelCard
+            v-for="hotel in formattedHotels.slice(0, 6)"
             :id="hotel.id"
             :key="hotel.id"
             :imageSrc="hotel.image"
@@ -268,18 +268,18 @@ const formattedHotels = computed(() => {
             :rating="hotel.rating"
           />
         </div>
-        
+
         <h2 class="text-3xl sm:text-4xl font-bold mb-4 text-everglade">
           Pourquoi choisir MatchRoom ?
         </h2>
-        
+
         <p class="text-quincy mb-10">
           MatchRoom vous permet de prendre le contrôle de vos dépenses de voyage en faisant des offres adaptées à votre budget.<br>
           Les hôteliers adorent notre approche qui leur permet d'optimiser leur taux d'occupation avec des clients de qualité.
         </p>
       </div>
     </div>
-    
+
    <ImageTextSection
       title="Comment fonctionne MatchRoom ?"
       description="En trois étapes simples, trouvez et réservez la chambre parfaite au prix qui vous convient. Recherchez parmi notre sélection d'hôtels premium, proposez votre prix, et si l'établissement accepte votre offre, confirmez instantanément votre réservation sans frais cachés."
@@ -309,7 +309,7 @@ const formattedHotels = computed(() => {
     />
 
 
-   
+
 
     <ImageTextSection
       title="Des offres adaptées à votre budget"
@@ -320,14 +320,14 @@ const formattedHotels = computed(() => {
       imagePosition="right"
       @buttonClick="showOffers"
     />
-    
+
      <!-- Carrousel des chambres -->
-     <RoomCarousel 
-      title="Nos chambres disponibles" 
+     <RoomCarousel
+      title="Nos chambres disponibles"
       description="Découvrez notre sélection d'hébergements de luxe à des prix négociables. Choisissez celui qui vous convient et faites votre offre."
       :rooms="formattedRooms"
     />
-    
+
     <!-- Section Avis Clients -->
     <div class="py-16 bg-cream">
       <div class="container mx-auto px-4 sm:px-6 lg:px-8">
@@ -338,7 +338,7 @@ const formattedHotels = computed(() => {
           Découvrez ce que nos utilisateurs pensent de leur expérience MatchRoom.<br>
           Rejoignez notre communauté de voyageurs satisfaits.
         </p>
-        
+
         <!-- Cartes d'avis -->
         <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
           <!-- Avis 1 -->
@@ -375,7 +375,7 @@ const formattedHotels = computed(() => {
               J'ai économisé près de 30% sur mon séjour à Nice grâce à MatchRoom ! J'avais un budget limité mais je tenais à séjourner dans un hôtel de qualité. L'hôtelier a accepté mon offre en moins d'une heure. Expérience à refaire absolument !
             </p>
           </div>
-          
+
           <!-- Avis 2 -->
           <div class="bg-colonial-white-light rounded-xl p-8 shadow-md">
             <div class="flex justify-center mb-4">
@@ -407,7 +407,7 @@ const formattedHotels = computed(() => {
               La transparence et la simplicité de MatchRoom m'ont impressionné. J'ai fait des offres pour 3 hôtels différents à Paris et j'ai reçu des propositions de chacun, me permettant de choisir celle qui correspondait le mieux à mes besoins. Service exceptionnel !
             </p>
           </div>
-          
+
           <!-- Avis 3 -->
           <div class="bg-colonial-white-light rounded-xl p-8 shadow-md">
             <div class="flex justify-center mb-4">
@@ -442,7 +442,7 @@ const formattedHotels = computed(() => {
         </div>
       </div>
     </div>
-    
+
     <!-- Section FAQ -->
     <div class="py-16 bg-cream">
       <div class="container mx-auto px-4 sm:px-6 lg:px-8">
@@ -539,7 +539,7 @@ const formattedHotels = computed(() => {
     <div>
       <!-- Ligne de séparation -->
       <div class="border-t border-gray-300 mx-auto max-w-7xl my-8"></div>
-      
+
       <!-- Section navigation -->
       <div class="container mx-auto px-4 sm:px-6 lg:px-8 pb-12">
         <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
@@ -550,7 +550,7 @@ const formattedHotels = computed(() => {
               L'approche innovante qui révolutionne la façon dont vous réservez vos séjours en permettant de négocier directement avec les établissements.
             </p>
           </div>
-          
+
           <!-- Liens - Colonne 1 -->
           <div class="md:col-span-1">
             <h4 class="text-lg font-semibold mb-4 text-quincy">Voyageurs</h4>
@@ -561,7 +561,7 @@ const formattedHotels = computed(() => {
               <li><a href="#" class="hover:text-burning-orange transition">Destinations populaires</a></li>
             </ul>
           </div>
-          
+
           <!-- Liens - Colonne 2 -->
           <div class="md:col-span-1">
             <h4 class="text-lg font-semibold mb-4 text-quincy">À propos</h4>
@@ -572,7 +572,7 @@ const formattedHotels = computed(() => {
               <li><a href="#" class="hover:text-burning-orange transition">Politique de confidentialité</a></li>
             </ul>
           </div>
-          
+
           <!-- Liens - Colonne 3 -->
           <div class="md:col-span-1">
             <h4 class="text-lg font-semibold mb-4 text-quincy">Services</h4>
@@ -585,17 +585,17 @@ const formattedHotels = computed(() => {
           </div>
         </div>
       </div>
-      
+
       <!-- Ligne de séparation -->
       <div class="border-t border-gray-300 mx-auto max-w-7xl"></div>
-      
+
       <!-- Copyright & Social -->
       <div class="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div class="flex flex-col md:flex-row justify-between items-center">
           <div class="text-quincy-light text-sm mb-4 md:mb-0">
             Transformez votre façon de voyager. Proposez votre prix, séjournez dans des lieux d'exception, économisez jusqu'à 40%.
           </div>
-          
+
           <!-- Social Icons -->
           <div class="flex space-x-4">
             <a href="#" class="w-10 h-10 rounded-full bg-white flex items-center justify-center">
@@ -615,7 +615,7 @@ const formattedHotels = computed(() => {
             </a>
           </div>
         </div>
-        
+
         <p class="text-quincy-light text-center text-xs mt-8">
           © 2023 MatchRoom. Tous droits réservés. MatchRoom n'est pas responsable du contenu des sites externes.
         </p>

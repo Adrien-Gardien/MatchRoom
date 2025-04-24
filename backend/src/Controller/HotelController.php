@@ -15,9 +15,12 @@ use Symfony\Component\Routing\Attribute\Route;
 final class HotelController extends AbstractController
 {
     #[Route('', name: 'index', methods: ['GET'])]
-    public function index(HotelRepository $repository): JsonResponse
+    public function index(Request $request, HotelRepository $repository): JsonResponse
     {
-        $hotels = $repository->findAll();
+        $city = $request->query->get('city');
+        $country = $request->query->get('country');
+
+        $hotels = $repository->findByFilters($city, $country);
 
         $data = array_map(function (Hotel $hotel) {
             return [
@@ -32,6 +35,7 @@ final class HotelController extends AbstractController
 
         return $this->json($data);
     }
+
 
     // first 20 hotels
     #[Route('/first-20', name: 'first-20', methods: ['GET'])]
@@ -65,6 +69,7 @@ final class HotelController extends AbstractController
                 'description' => $room->getDescription(),
                 'price' => $room->getPricePerNight(),
                 'capacity' => $room->getCapacity(),
+                'image' => $room->getImage(),
             ];
         }
     
@@ -87,6 +92,7 @@ final class HotelController extends AbstractController
             'city' => $hotel->getCity(),
             'country' => $hotel->getCountry(),
             'description' => $hotel->getDescription(),
+            'image' => $hotel->getImage(),
             'favorites' => $favorites,
             'rooms' => $rooms,
         ]);

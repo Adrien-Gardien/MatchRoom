@@ -25,6 +25,8 @@ class RoomFixtures extends Fixture
                 $room->setDescription($faker->paragraph(2));
                 $room->setPricePerNight($faker->randomFloat(2, 50, 300));
                 $room->setCapacity($faker->numberBetween(1, 5));
+                $room->setImage('https://picsum.photos/640/480?random=' . $i);
+
 
                 // Sélectionner un hôtel au hasard parmi les hôtels existants
                 $hotel = $faker->randomElement($hotels);
