@@ -5,11 +5,11 @@ export default defineNuxtRouteMiddleware(async (to) => {
         await authStore.fetchUser();
     }
 
-    if (!authStore.isAuthenticated && to.path !== '/login') {
-        return navigateTo('/login');
+    if (!authStore.isAuthenticated && !['/login', '/register', '/verify/email'].includes(to.path)) {
+      return navigateTo('/login');
     }
 
-    if (authStore.isAuthenticated && to.path === '/login') {
-        return navigateTo('/');
+    if (authStore.isAuthenticated && ['/login', '/register', '/verify/email'].includes(to.path)) {
+      return navigateTo('/');
     }
 });
