@@ -20,6 +20,7 @@ export default {
                 'hawkes-blue-dark': '#B0D6FF',
                 'quincy-light': '#7A4C3D',
                 'quincy-dark': '#42271D',
+                'cream': '#FFF9E9',
                 brand: {
                     25: 'var(--brand-25)',
                     50: 'var(--brand-50)',

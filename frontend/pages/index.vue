@@ -2,8 +2,8 @@
 // Données fictives pour l'exemple
 import ImageTextSection from '~/components/organisms/ImageTextSection.vue';
 import RoomCarousel from '~/components/organisms/RoomCarousel.vue';
-import Header from '~/components/layout/Header.vue';
 import { onMounted, ref, computed } from 'vue';
+import HotelCard from '~/components/organisms/HotelCard.vue';
 
 // Dates pour la recherche
 const searchDates = ref({
@@ -30,6 +30,7 @@ const formatDate = (dateString) => {
 
 // Variable pour stocker les données des chambres
 const room = ref([]);
+const hotels = ref([]);
 const error = ref(null);
 
 // Récupération des données de la chambre
@@ -45,20 +46,33 @@ const fetchRooms = async () => {
   } 
 };
 
+const fetchHotels = async () => {
+  try {
+    const response = await $fetch(`/api/hotel/first-20`);
+    console.log("Réponse de l'API:", response);
+    hotels.value = response;
+  } catch (err) {
+    console.error(err);
+    error.value = "Erreur lors du chargement des données des hôtels.";
+  }
+};
+
 onMounted(() => {
   fetchRooms();
+  fetchHotels();
 });
 
 // Formatage des données pour le composant RoomCarousel
 const formattedRooms = computed(() => {
   if (!room.value || room.value.length === 0) return [];
-  
+  console.log("room", room.value);
   return room.value.map(room => ({
+    id: room.id,
     title: room.name,
     h5Title: room.hotelName || 'Hôtel',
     h4Title: `Capacité: ${room.capacity} personne(s)`,
     h6Title: room.description ? (room.description.length > 60 ? room.description.substring(0, 60) + '...' : room.description) : '',
-    image: 'https://images.unsplash.com/photo-1566073771259-6a8506099945?ixlib=rb-4.0.3&auto=format&fit=crop&q=80',
+    image: 'https://images.unsplash.com/photo-1566073771259-6a8506099945?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80',
     rating: '9.0',
     reviewCount: '50',
     price: `${room.pricePerNight}€ / nuit`,
@@ -66,13 +80,31 @@ const formattedRooms = computed(() => {
   }));
 });
 
+// Formatage des données pour le composant HotelCarousel
+const formattedHotels = computed(() => {
+  if (!hotels.value || hotels.value.length === 0) return [];
+  console.log("hotels", hotels.value);
+  return hotels.value.map(hotel => ({
+    id: hotel.id,
+    title: hotel.name,
+    description: hotel.description,
+    city: hotel.city,
+    country: hotel.country,
+    image: hotel.image || 'https://images.unsplash.com/photo-1566073771259-6a8506099945?ixlib=rb-4.0.3&auto=format&fit=crop&q=80',
+    rooms: hotel.rooms,
+    favorites: hotel.favorites,
+    owners: hotel.owners,
+    tag: hotel.city || 'Premium',
+    tagType: 'premium',
+    rating: '4.8'
+  }));
+});
+
+
 </script>
 
 <template>
   <div class="min-h-screen bg-cream">
-    <!-- Header -->
-    <Header />
-    
     <!-- Header section -->
     <div class="relative h-[75vh] overflow-hidden rounded-b-[2rem]">
       <!-- Background gradients -->
@@ -224,143 +256,17 @@ const formattedRooms = computed(() => {
         
         <!-- Cartes H4 -->
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 mb-20">
-          <!-- Carte 1 -->
-          <div class="bg-white rounded-2xl p-0 shadow-lg overflow-hidden transform transition-all duration-300 hover:shadow-xl hover:-translate-y-2">
-            <div class="relative">
-              <div class="w-full h-48 bg-hawkes-blue bg-[url('https://images.unsplash.com/photo-1566073771259-6a8506099945?ixlib=rb-4.0.3&auto=format&fit=crop&q=80')] bg-cover bg-center"></div>
-              <div class="absolute top-4 right-4 bg-burning-orange text-white text-xs font-semibold px-3 py-1 rounded-full">Premium</div>
-            </div>
-            <div class="p-6">
-              <h4 class="text-xl font-bold mb-3 text-everglade">Hôtels de Luxe</h4>
-              <p class="text-quincy-light text-sm mb-4">
-                Accédez à des établissements 5 étoiles à prix négociés. Notre plateforme vous connecte directement avec des hôtels de luxe prêts à accepter vos offres personnalisées.
-              </p>
-              <div class="flex justify-between items-center">
-                <div class="flex items-center space-x-1">
-                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="#EA672D" class="w-4 h-4">
-                    <path fill-rule="evenodd" d="M10.788 3.21c.448-1.077 1.976-1.077 2.424 0l2.082 5.007 5.404.433c1.164.093 1.636 1.545.749 2.305l-4.117 3.527 1.257 5.273c.271 1.136-.964 2.033-1.96 1.425L12 18.354 7.373 21.18c-.996.608-2.231-.29-1.96-1.425l1.257-5.273-4.117-3.527c-.887-.76-.415-2.212.749-2.305l5.404-.433 2.082-5.006z" clip-rule="evenodd" />
-                  </svg>
-                  <span class="text-sm font-medium text-quincy">4.9</span>
-                </div>
-                <a href="#" class="text-sm font-semibold text-hawkes-blue-light bg-everglade px-4 py-2 rounded-lg hover:bg-everglade-light transition-colors">Explorer</a>
-              </div>
-            </div>
-          </div>
-          
-          <!-- Carte 2 -->
-          <div class="bg-white rounded-2xl p-0 shadow-lg overflow-hidden transform transition-all duration-300 hover:shadow-xl hover:-translate-y-2">
-            <div class="relative">
-              <div class="w-full h-48 bg-hawkes-blue bg-[url('https://images.unsplash.com/photo-1520250497591-112f2f40a3f4?ixlib=rb-4.0.3&auto=format&fit=crop&q=80')] bg-cover bg-center"></div>
-              <div class="absolute top-4 right-4 bg-hawkes-blue text-everglade text-xs font-semibold px-3 py-1 rounded-full">Unique</div>
-            </div>
-            <div class="p-6">
-              <h4 class="text-xl font-bold mb-3 text-everglade">Boutique Hôtels</h4>
-              <p class="text-quincy-light text-sm mb-4">
-                Découvrez des établissements uniques avec du caractère. Ces joyaux cachés offrent une expérience personnalisée et authentique que vous ne trouverez nulle part ailleurs.
-              </p>
-              <div class="flex justify-between items-center">
-                <div class="flex items-center space-x-1">
-                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="#EA672D" class="w-4 h-4">
-                    <path fill-rule="evenodd" d="M10.788 3.21c.448-1.077 1.976-1.077 2.424 0l2.082 5.007 5.404.433c1.164.093 1.636 1.545.749 2.305l-4.117 3.527 1.257 5.273c.271 1.136-.964 2.033-1.96 1.425L12 18.354 7.373 21.18c-.996.608-2.231-.29-1.96-1.425l1.257-5.273-4.117-3.527c-.887-.76-.415-2.212.749-2.305l5.404-.433 2.082-5.006z" clip-rule="evenodd" />
-                  </svg>
-                  <span class="text-sm font-medium text-quincy">4.8</span>
-                </div>
-                <a href="#" class="text-sm font-semibold text-hawkes-blue-light bg-everglade px-4 py-2 rounded-lg hover:bg-everglade-light transition-colors">Explorer</a>
-              </div>
-            </div>
-          </div>
-          
-          <!-- Carte 3 -->
-          <div class="bg-white rounded-2xl p-0 shadow-lg overflow-hidden transform transition-all duration-300 hover:shadow-xl hover:-translate-y-2">
-            <div class="relative">
-              <div class="w-full h-48 bg-hawkes-blue bg-[url('https://images.unsplash.com/photo-1561501878-aabd62634533?ixlib=rb-4.0.3&auto=format&fit=crop&q=80')] bg-cover bg-center"></div>
-              <div class="absolute top-4 right-4 bg-colonial-white-dark text-quincy text-xs font-semibold px-3 py-1 rounded-full">Longue durée</div>
-            </div>
-            <div class="p-6">
-              <h4 class="text-xl font-bold mb-3 text-everglade">Résidences Premium</h4>
-              <p class="text-quincy-light text-sm mb-4">
-                Pour les séjours prolongés, nos résidences premium combinent le confort d'un appartement avec les services d'un hôtel haut de gamme à des tarifs avantageux.
-              </p>
-              <div class="flex justify-between items-center">
-                <div class="flex items-center space-x-1">
-                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="#EA672D" class="w-4 h-4">
-                    <path fill-rule="evenodd" d="M10.788 3.21c.448-1.077 1.976-1.077 2.424 0l2.082 5.007 5.404.433c1.164.093 1.636 1.545.749 2.305l-4.117 3.527 1.257 5.273c.271 1.136-.964 2.033-1.96 1.425L12 18.354 7.373 21.18c-.996.608-2.231-.29-1.96-1.425l1.257-5.273-4.117-3.527c-.887-.76-.415-2.212.749-2.305l5.404-.433 2.082-5.006z" clip-rule="evenodd" />
-                  </svg>
-                  <span class="text-sm font-medium text-quincy">4.7</span>
-                </div>
-                <a href="#" class="text-sm font-semibold text-hawkes-blue-light bg-everglade px-4 py-2 rounded-lg hover:bg-everglade-light transition-colors">Explorer</a>
-              </div>
-            </div>
-          </div>
-          
-          <!-- Carte 4 -->
-          <div class="bg-white rounded-2xl p-0 shadow-lg overflow-hidden transform transition-all duration-300 hover:shadow-xl hover:-translate-y-2">
-            <div class="relative">
-              <div class="w-full h-48 bg-hawkes-blue bg-[url('https://images.unsplash.com/photo-1571003123894-1f0594d2b5d9?ixlib=rb-4.0.3&auto=format&fit=crop&q=80')] bg-cover bg-center"></div>
-              <div class="absolute top-4 right-4 bg-burning-orange text-white text-xs font-semibold px-3 py-1 rounded-full">Exclusif</div>
-            </div>
-            <div class="p-6">
-              <h4 class="text-xl font-bold mb-3 text-everglade">Offres Exclusives</h4>
-              <p class="text-quincy-light text-sm mb-4">
-                Accédez à des offres disponibles uniquement sur MatchRoom. Nos partenaires réservent certaines de leurs meilleures chambres pour nos utilisateurs.
-              </p>
-              <div class="flex justify-between items-center">
-                <div class="flex items-center space-x-1">
-                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="#EA672D" class="w-4 h-4">
-                    <path fill-rule="evenodd" d="M10.788 3.21c.448-1.077 1.976-1.077 2.424 0l2.082 5.007 5.404.433c1.164.093 1.636 1.545.749 2.305l-4.117 3.527 1.257 5.273c.271 1.136-.964 2.033-1.96 1.425L12 18.354 7.373 21.18c-.996.608-2.231-.29-1.96-1.425l1.257-5.273-4.117-3.527c-.887-.76-.415-2.212.749-2.305l5.404-.433 2.082-5.006z" clip-rule="evenodd" />
-                  </svg>
-                  <span class="text-sm font-medium text-quincy">4.9</span>
-                </div>
-                <a href="#" class="text-sm font-semibold text-hawkes-blue-light bg-everglade px-4 py-2 rounded-lg hover:bg-everglade-light transition-colors">Explorer</a>
-              </div>
-            </div>
-          </div>
-          
-          <!-- Carte 5 -->
-          <div class="bg-white rounded-2xl p-0 shadow-lg overflow-hidden transform transition-all duration-300 hover:shadow-xl hover:-translate-y-2">
-            <div class="relative">
-              <div class="w-full h-48 bg-hawkes-blue bg-[url('https://images.unsplash.com/photo-1584132967334-10e028bd69f7?ixlib=rb-4.0.3&auto=format&fit=crop&q=80')] bg-cover bg-center"></div>
-              <div class="absolute top-4 right-4 bg-hawkes-blue text-everglade text-xs font-semibold px-3 py-1 rounded-full">Bien-être</div>
-            </div>
-            <div class="p-6">
-              <h4 class="text-xl font-bold mb-3 text-everglade">Escapades Bien-être</h4>
-              <p class="text-quincy-light text-sm mb-4">
-                Offrez-vous une parenthèse de détente dans nos établissements spa & bien-être partenaires. Faites votre offre et vivez une expérience relaxante à prix réduit.
-              </p>
-              <div class="flex justify-between items-center">
-                <div class="flex items-center space-x-1">
-                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="#EA672D" class="w-4 h-4">
-                    <path fill-rule="evenodd" d="M10.788 3.21c.448-1.077 1.976-1.077 2.424 0l2.082 5.007 5.404.433c1.164.093 1.636 1.545.749 2.305l-4.117 3.527 1.257 5.273c.271 1.136-.964 2.033-1.96 1.425L12 18.354 7.373 21.18c-.996.608-2.231-.29-1.96-1.425l1.257-5.273-4.117-3.527c-.887-.76-.415-2.212.749-2.305l5.404-.433 2.082-5.006z" clip-rule="evenodd" />
-                  </svg>
-                  <span class="text-sm font-medium text-quincy">4.8</span>
-                </div>
-                <a href="#" class="text-sm font-semibold text-hawkes-blue-light bg-everglade px-4 py-2 rounded-lg hover:bg-everglade-light transition-colors">Explorer</a>
-              </div>
-            </div>
-          </div>
-          
-          <!-- Carte 6 -->
-          <div class="bg-white rounded-2xl p-0 shadow-lg overflow-hidden transform transition-all duration-300 hover:shadow-xl hover:-translate-y-2">
-            <div class="relative">
-              <div class="w-full h-48 bg-hawkes-blue bg-[url('https://images.unsplash.com/photo-1596394516093-501ba68a0ba6?ixlib=rb-4.0.3&auto=format&fit=crop&q=80')] bg-cover bg-center"></div>
-              <div class="absolute top-4 right-4 bg-colonial-white-dark text-quincy text-xs font-semibold px-3 py-1 rounded-full">Urbain</div>
-            </div>
-            <div class="p-6">
-              <h4 class="text-xl font-bold mb-3 text-everglade">Destinations Urbaines</h4>
-              <p class="text-quincy-light text-sm mb-4">
-                Explorez les métropoles du monde entier en séjournant dans des hôtels idéalement situés au cœur des villes les plus dynamiques à des prix avantageux.
-              </p>
-              <div class="flex justify-between items-center">
-                <div class="flex items-center space-x-1">
-                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="#EA672D" class="w-4 h-4">
-                    <path fill-rule="evenodd" d="M10.788 3.21c.448-1.077 1.976-1.077 2.424 0l2.082 5.007 5.404.433c1.164.093 1.636 1.545.749 2.305l-4.117 3.527 1.257 5.273c.271 1.136-.964 2.033-1.96 1.425L12 18.354 7.373 21.18c-.996.608-2.231-.29-1.96-1.425l1.257-5.273-4.117-3.527c-.887-.76-.415-2.212.749-2.305l5.404-.433 2.082-5.006z" clip-rule="evenodd" />
-                  </svg>
-                  <span class="text-sm font-medium text-quincy">4.7</span>
-                </div>
-                <a href="#" class="text-sm font-semibold text-hawkes-blue-light bg-everglade px-4 py-2 rounded-lg hover:bg-everglade-light transition-colors">Explorer</a>
-              </div>
-            </div>
-          </div>
+          <HotelCard 
+            v-for="hotel in formattedHotels.slice(0, 6)" 
+            :id="hotel.id"
+            :key="hotel.id"
+            :imageSrc="hotel.image"
+            :tag="hotel.city"
+            tagType="premium"
+            :title="hotel.title"
+            :description="hotel.description ? (hotel.description.length > 100 ? hotel.description.substring(0, 100) + '...' : hotel.description) : 'Découvrez cet établissement exceptionnel.'"
+            :rating="hotel.rating"
+          />
         </div>
         
         <h2 class="text-3xl sm:text-4xl font-bold mb-4 text-everglade">
