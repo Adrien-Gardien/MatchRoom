@@ -6,6 +6,7 @@ use App\Entity\RefreshToken;
 use App\Entity\Room;
 use App\Repository\RefreshTokenRepository;
 use App\Repository\UserRepository;
+use App\Repository\RoomRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -17,22 +18,59 @@ use Symfony\Component\Serializer\SerializerInterface;
 #[Route('/api/room', name: 'app_refresh_token_')]
 final class RoomController extends AbstractController
 {
+    
     #[Route('/', name: 'index', methods: ['GET'])]
-    public function index(RefreshTokenRepository $repository): JsonResponse
+    public function index(RoomRepository $repository): JsonResponse
     {
-        $tokens = $repository->findAll();
-
-        $data = array_map(function (RefreshToken $token) {
+        $rooms = $repository->findAll();
+    
+        $data = array_map(function (Room $room) {
             return [
-                'id' => $token->getId(),
-                'token' => $token->getToken(),
-                'expiresAt' => $token->getExpiresAt()?->format('Y-m-d H:i:s'),
-                'userId' => $token->getUser()?->getId(),
+                'id' => $room->getId(),
+                'name' => $room->getName(),
+                'description' => $room->getDescription(),
+                'pricePerNight' => $room->getPricePerNight(),
+                'capacity' => $room->getCapacity(),
+                'hotelName' => $room->getHotel()->getName(),
+                'service' => $room->getService(),
+                'ambiance' => $room->getAmbiance(),
+                'bookings' => $room->getBookings(),
+                'offers' => $room->getOffers(),
+                'ratings' => $room->getRatings(),
+                'matching' => $room->getMatchings(),
+                'favorites' => $room->getFavorites(),
             ];
-        }, $tokens);
-
+        }, $rooms);
+    
         return $this->json($data);
     }
+
+    // Get first 20 rooms
+    #[Route('/first-20', name: 'first-20', methods: ['GET'])]
+    public function first20(RoomRepository $repository): JsonResponse
+    {
+        $rooms = $repository->findBy([], null, 20);
+        $data = array_map(function (Room $room) {
+            return [
+                'id' => $room->getId(),
+                'name' => $room->getName(),
+                'description' => $room->getDescription(),
+                'pricePerNight' => $room->getPricePerNight(),
+                'capacity' => $room->getCapacity(),
+                'hotelName' => $room->getHotel()->getName(),
+                'service' => $room->getService(),
+                'ambiance' => $room->getAmbiance(),
+                'bookings' => $room->getBookings(),
+                'offers' => $room->getOffers(),
+                'ratings' => $room->getRatings(),
+                'matching' => $room->getMatchings(),
+                'favorites' => $room->getFavorites(),
+            ];
+        }, $rooms);
+        
+        return $this->json($data);
+    }
+    
 
     #[Route('/{id}', name: 'show', methods: ['GET'])]
     public function show(Room $room, SerializerInterface $serializer): JsonResponse

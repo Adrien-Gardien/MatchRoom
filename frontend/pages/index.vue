@@ -2,6 +2,8 @@
 // Données fictives pour l'exemple
 import ImageTextSection from '~/components/organisms/ImageTextSection.vue';
 import RoomCarousel from '~/components/organisms/RoomCarousel.vue';
+import Header from '~/components/layout/Header.vue';
+import { onMounted, ref, computed } from 'vue';
 
 // Dates pour la recherche
 const searchDates = ref({
@@ -25,106 +27,148 @@ const formatDate = (dateString) => {
   const month = (date.getMonth() + 1).toString().padStart(2, '0');
   return `${day}/${month}`;
 };
+
+// Variable pour stocker les données des chambres
+const room = ref([]);
+const error = ref(null);
+
+// Récupération des données de la chambre
+const fetchRooms = async () => {
+  try {
+    const response = await $fetch(`/api/room/first-20`);
+    console.log("Réponse de l'API:", response);
+    room.value = response;
+    error.value = null;
+  } catch (err) {
+    console.error(err);
+    error.value = "Erreur lors du chargement des données de la chambre.";
+  } 
+};
+
+onMounted(() => {
+  fetchRooms();
+});
+
+// Formatage des données pour le composant RoomCarousel
+const formattedRooms = computed(() => {
+  if (!room.value || room.value.length === 0) return [];
+  
+  return room.value.map(room => ({
+    title: room.name,
+    h5Title: room.hotelName || 'Hôtel',
+    h4Title: `Capacité: ${room.capacity} personne(s)`,
+    h6Title: room.description ? (room.description.length > 60 ? room.description.substring(0, 60) + '...' : room.description) : '',
+    image: 'https://images.unsplash.com/photo-1566073771259-6a8506099945?ixlib=rb-4.0.3&auto=format&fit=crop&q=80',
+    rating: '9.0',
+    reviewCount: '50',
+    price: `${room.pricePerNight}€ / nuit`,
+    discount: '-15% à -30%'
+  }));
+});
+
 </script>
 
 <template>
   <div class="min-h-screen bg-cream">
-    <!-- Header section -->
-<div class="relative h-[75vh] overflow-hidden rounded-b-[2rem]">
-  <!-- Background gradients -->
-  <div class="absolute inset-0 bg-gradient-to-r from-black/50 to-black/80 z-10"></div>
-  <!-- Background image -->
-  <div class="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1566073771259-6a8506099945?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80')] bg-cover bg-center animate-subtle-zoom"></div>
-
-  <!-- Text & CTA -->
-  <div class="relative z-20 flex flex-col items-center justify-center h-full text-colonial-white px-4 sm:px-6 lg:px-8">
-    <h1 class="text-4xl sm:text-5xl md:text-6xl font-normal text-center mb-4 animate-fade-in drop-shadow-lg">
-      Enchérissez sur votre Séjour de Rêve
-    </h1>
-    <p class="text-lg sm:text-xl md:text-2xl text-center max-w-3xl mb-8 animate-slide-up">
-      Proposez votre prix pour des chambres d'hôtel de luxe et économisez jusqu'à 40%
-    </p>
+    <!-- Header -->
+    <Header />
     
-    <button class="px-6 py-3 bg-hawkes-blue hover:bg-hawkes-blue-light text-black rounded-xl shadow-lg transition transform hover:scale-105 mb-12">
-      Matcher ma room
-    </button>
-  </div>
-</div>
+    <!-- Header section -->
+    <div class="relative h-[75vh] overflow-hidden rounded-b-[2rem]">
+      <!-- Background gradients -->
+      <div class="absolute inset-0 bg-gradient-to-r from-black/50 to-black/80 z-10"></div>
+      <!-- Background image -->
+      <div class="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1566073771259-6a8506099945?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80')] bg-cover bg-center animate-subtle-zoom"></div>
 
-<!-- Barre de recherche responsive -->
-<div class="relative -mt-12 z-30 flex justify-center px-4">
-  <div class="w-full max-w-4xl bg-[#FFF9E9]/80 shadow-lg rounded-xl overflow-hidden backdrop-blur-sm">
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 divide-y sm:divide-y-0 sm:divide-x divide-colonial-white-dark">
-      
-      <!-- Destination -->
-      <div class="p-3 text-center">
-        <p class="text-quincy-light text-sm mb-1">Destination</p>
-        <input type="text" placeholder="Paris, Nice..." class="w-full text-sm bg-transparent border-0 focus:ring-0 text-quincy text-center placeholder:text-gray-400" />
+      <!-- Text & CTA -->
+      <div class="relative z-20 flex flex-col items-center justify-center h-full text-colonial-white px-4 sm:px-6 lg:px-8">
+        <h1 class="text-4xl sm:text-5xl md:text-6xl font-normal text-center mb-4 animate-fade-in drop-shadow-lg">
+          Enchérissez sur votre Séjour de Rêve
+        </h1>
+        <p class="text-lg sm:text-xl md:text-2xl text-center max-w-3xl mb-8 animate-slide-up">
+          Proposez votre prix pour des chambres d'hôtel de luxe et économisez jusqu'à 40%
+        </p>
+        
+        <button class="px-6 py-3 bg-hawkes-blue hover:bg-hawkes-blue-light text-black rounded-xl shadow-lg transition transform hover:scale-105 mb-12">
+          Matcher ma room
+        </button>
       </div>
-
-      <!-- Date de départ -->
-      <div class="p-3 text-center">
-        <p class="text-quincy-light text-sm mb-1">Date de départ</p>
-        <div class="relative w-full">
-          <div class="flex items-center justify-center">
-            <input 
-              v-model="searchDates.checkIn" 
-              type="date" 
-              :min="today" 
-              class="w-full text-sm bg-transparent border-0 focus:ring-0 text-quincy placeholder:text-gray-400 opacity-0 absolute inset-0 cursor-pointer z-10"
-            />
-            <div class="flex items-center space-x-2 w-full justify-center">
-              <svg class="w-5 h-5 text-quincy-light" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
-                <line x1="16" y1="2" x2="16" y2="6" />
-                <line x1="8" y1="2" x2="8" y2="6" />
-                <line x1="3" y1="10" x2="21" y2="10" />
-              </svg>
-              <span class="text-sm text-quincy">{{ searchDates.checkIn ? formatDate(searchDates.checkIn) : 'JJ/MM' }}</span>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Date d'arrivée -->
-      <div class="p-3 text-center">
-        <p class="text-quincy-light text-sm mb-1">Date d'arrivée</p>
-        <div class="relative w-full">
-          <div class="flex items-center justify-center">
-            <input 
-              v-model="searchDates.checkOut" 
-              type="date" 
-              :min="minCheckoutDate" 
-              class="w-full text-sm bg-transparent border-0 focus:ring-0 text-quincy placeholder:text-gray-400 opacity-0 absolute inset-0 cursor-pointer z-10"
-              :disabled="!searchDates.checkIn"
-            />
-            <div class="flex items-center space-x-2 w-full justify-center">
-              <svg class="w-5 h-5 text-quincy-light" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
-                <line x1="16" y1="2" x2="16" y2="6" />
-                <line x1="8" y1="2" x2="8" y2="6" />
-                <line x1="3" y1="10" x2="21" y2="10" />
-              </svg>
-              <span class="text-sm text-quincy">{{ searchDates.checkOut ? formatDate(searchDates.checkOut) : 'JJ/MM/AA' }}</span>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Voyageurs -->
-      <div class="p-3 text-center">
-        <p class="text-quincy-light text-sm mb-1">Voyageurs</p>
-        <input type="number" min="1" placeholder="2" class="w-full text-sm bg-transparent border-0 focus:ring-0 text-quincy text-center" />
-      </div>
-
-      <!-- Bouton Rechercher -->
-      <div class="flex items-center justify-center text-center m-4 rounded-xl bg-[#D2E8FF]/70 text-everglade transition-colors">
-        <button class="w-full py-3 font-semibold text-sm">Rechercher</button>
-      </div>
-
     </div>
-  </div>
-</div>
+
+    <!-- Barre de recherche responsive -->
+    <div class="relative -mt-12 z-30 flex justify-center px-4">
+      <div class="w-full max-w-4xl bg-[#FFF9E9]/80 shadow-lg rounded-xl overflow-hidden backdrop-blur-sm">
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 divide-y sm:divide-y-0 sm:divide-x divide-colonial-white-dark">
+          
+          <!-- Destination -->
+          <div class="p-3 text-center">
+            <p class="text-quincy-light text-sm mb-1">Destination</p>
+            <input type="text" placeholder="Paris, Nice..." class="w-full text-sm bg-transparent border-0 focus:ring-0 text-quincy text-center placeholder:text-gray-400" />
+          </div>
+
+          <!-- Date de départ -->
+          <div class="p-3 text-center">
+            <p class="text-quincy-light text-sm mb-1">Date de départ</p>
+            <div class="relative w-full">
+              <div class="flex items-center justify-center">
+                <input 
+                  v-model="searchDates.checkIn" 
+                  type="date" 
+                  :min="today" 
+                  class="w-full text-sm bg-transparent border-0 focus:ring-0 text-quincy placeholder:text-gray-400 opacity-0 absolute inset-0 cursor-pointer z-10"
+                />
+                <div class="flex items-center space-x-2 w-full justify-center">
+                  <svg class="w-5 h-5 text-quincy-light" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
+                    <line x1="16" y1="2" x2="16" y2="6" />
+                    <line x1="8" y1="2" x2="8" y2="6" />
+                    <line x1="3" y1="10" x2="21" y2="10" />
+                  </svg>
+                  <span class="text-sm text-quincy">{{ searchDates.checkIn ? formatDate(searchDates.checkIn) : 'JJ/MM' }}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Date d'arrivée -->
+          <div class="p-3 text-center">
+            <p class="text-quincy-light text-sm mb-1">Date d'arrivée</p>
+            <div class="relative w-full">
+              <div class="flex items-center justify-center">
+                <input 
+                  v-model="searchDates.checkOut" 
+                  type="date" 
+                  :min="minCheckoutDate" 
+                  class="w-full text-sm bg-transparent border-0 focus:ring-0 text-quincy placeholder:text-gray-400 opacity-0 absolute inset-0 cursor-pointer z-10"
+                  :disabled="!searchDates.checkIn"
+                />
+                <div class="flex items-center space-x-2 w-full justify-center">
+                  <svg class="w-5 h-5 text-quincy-light" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
+                    <line x1="16" y1="2" x2="16" y2="6" />
+                    <line x1="8" y1="2" x2="8" y2="6" />
+                    <line x1="3" y1="10" x2="21" y2="10" />
+                  </svg>
+                  <span class="text-sm text-quincy">{{ searchDates.checkOut ? formatDate(searchDates.checkOut) : 'JJ/MM/AA' }}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Voyageurs -->
+          <div class="p-3 text-center">
+            <p class="text-quincy-light text-sm mb-1">Voyageurs</p>
+            <input type="number" min="1" placeholder="2" class="w-full text-sm bg-transparent border-0 focus:ring-0 text-quincy text-center" />
+          </div>
+
+          <!-- Bouton Rechercher -->
+          <div class="flex items-center justify-center text-center m-4 rounded-xl bg-[#D2E8FF]/70 text-everglade transition-colors">
+            <button class="w-full py-3 font-semibold text-sm">Rechercher</button>
+          </div>
+
+        </div>
+      </div>
+    </div>
 
     
     <!-- Section H2 avec image et stats -->
@@ -375,74 +419,7 @@ const formatDate = (dateString) => {
      <RoomCarousel 
       title="Nos chambres disponibles" 
       description="Découvrez notre sélection d'hébergements de luxe à des prix négociables. Choisissez celui qui vous convient et faites votre offre."
-      :rooms="[
-        {
-          title: 'H3- Titre',
-          h5Title: 'H5- Titre',
-          h4Title: 'H4- Titre',
-          h6Title: 'H6- Titre',
-          image: 'https://images.unsplash.com/photo-1566073771259-6a8506099945?ixlib=rb-4.0.3&auto=format&fit=crop&q=80',
-          rating: '9.4',
-          reviewCount: '164',
-          price: '170€ / nuits',
-          discount: '-15% à -30%'
-        },
-        {
-          title: 'H3- Titre',
-          h5Title: 'H5- Titre',
-          h4Title: 'H4- Titre',
-          h6Title: 'H6- Titre',
-          image: 'https://images.unsplash.com/photo-1578683010236-d716f9a3f461?ixlib=rb-4.0.3&auto=format&fit=crop&q=80',
-          rating: '9.4',
-          reviewCount: '164',
-          price: '170€ / nuits',
-          discount: '-15% à -30%'
-        },
-        {
-          title: 'H3- Titre',
-          h5Title: 'H5- Titre',
-          h4Title: 'H4- Titre',
-          h6Title: 'H6- Titre',
-          image: 'https://images.unsplash.com/photo-1596394516093-501ba68a0ba6?ixlib=rb-4.0.3&auto=format&fit=crop&q=80',
-          rating: '9.4',
-          reviewCount: '164',
-          price: '170€ / nuits',
-          discount: '-15% à -30%'
-        },
-        {
-          title: 'H3- Titre',
-          h5Title: 'H5- Titre',
-          h4Title: 'H4- Titre',
-          h6Title: 'H6- Titre',
-          image: 'https://images.unsplash.com/photo-1551882547-ff40c63fe5fa?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80',
-          rating: '9.4',
-          reviewCount: '164',
-          price: '170€ / nuits',
-          discount: '-15% à -30%'
-        },
-        {
-          title: 'H3- Titre',
-          h5Title: 'H5- Titre',
-          h4Title: 'H4- Titre',
-          h6Title: 'H6- Titre',
-          image: 'https://images.unsplash.com/photo-1551882547-ff40c63fe5fa?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80',
-          rating: '9.4',
-          reviewCount: '164',
-          price: '170€ / nuits',
-          discount: '-15% à -30%'
-        },
-        {
-          title: 'H3- Titre',
-          h5Title: 'H5- Titre',
-          h4Title: 'H4- Titre',
-          h6Title: 'H6- Titre',
-          image: 'https://images.unsplash.com/photo-1551882547-ff40c63fe5fa?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80',
-          rating: '9.4',
-          reviewCount: '164',
-          price: '170€ / nuits',
-          discount: '-15% à -30%'
-        }   
-      ]"
+      :rooms="formattedRooms"
     />
     
     <!-- Section Avis Clients -->
@@ -468,6 +445,9 @@ const formatDate = (dateString) => {
             <h4 class="text-xl font-bold text-center mb-2 text-quincy">Marie Dubois</h4>
             <div class="flex justify-center mb-3">
               <div class="flex space-x-1">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="#EA672D" class="w-5 h-5">
+                  <path fill-rule="evenodd" d="M10.788 3.21c.448-1.077 1.976-1.077 2.424 0l2.082 5.007 5.404.433c1.164.093 1.636 1.545.749 2.305l-4.117 3.527 1.257 5.273c.271 1.136-.964 2.033-1.96 1.425L12 18.354 7.373 21.18c-.996.608-2.231-.29-1.96-1.425l1.257-5.273-4.117-3.527c-.887-.76-.415-2.212.749-2.305l5.404-.433 2.082-5.006z" clip-rule="evenodd" />
+                </svg>
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="#EA672D" class="w-5 h-5">
                   <path fill-rule="evenodd" d="M10.788 3.21c.448-1.077 1.976-1.077 2.424 0l2.082 5.007 5.404.433c1.164.093 1.636 1.545.749 2.305l-4.117 3.527 1.257 5.273c.271 1.136-.964 2.033-1.96 1.425L12 18.354 7.373 21.18c-.996.608-2.231-.29-1.96-1.425l1.257-5.273-4.117-3.527c-.887-.76-.415-2.212.749-2.305l5.404-.433 2.082-5.006z" clip-rule="evenodd" />
                 </svg>
