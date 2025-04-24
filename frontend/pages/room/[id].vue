@@ -1,88 +1,28 @@
 <script setup>
 import { ref, onMounted, computed, onUnmounted, watch } from 'vue';
+import { useRoute, navigateTo } from '#app';
 import UBaseModal from '~/components/molecules/UBaseModal.vue';
 import UDatePicker from '~/components/molecules/UDatePicker.vue';
 
 const route = useRoute();
 const id = route.params.id;
 
-// Données factices pour la chambre
-const room = ref({
-  id: id,
-  name: "Suite Présidentielle",
-  description: "Notre suite la plus luxueuse offre un espace de vie spacieux avec un salon séparé, une chambre principale avec un lit king-size ultra-confortable, et une salle de bain en marbre avec baignoire à remous et douche à l'italienne. Profitez d'une vue panoramique imprenable sur la ville depuis votre balcon privé. La suite est équipée d'une télévision à écran plat, d'un mini-bar bien approvisionné, d'un coffre-fort, et d'une connexion Wi-Fi haut débit gratuite.",
-  pricePerNight: "500.00",
-  capacity: 2,
-  hotel: {
-    id: 1,
-    name: "Hôtel Le Magnifique",
-    address: "123 Avenue des Champs-Élysées",
-    city: "Paris",
-    country: "France"
-  },
-  services: [
-    { id: 1, name: "Wi-Fi gratuit" },
-    { id: 2, name: "Climatisation" },
-    { id: 3, name: "Mini-bar" },
-    { id: 4, name: "Coffre-fort" },
-    { id: 5, name: "Service en chambre 24h/24" }
-  ],
-  ambiances: [
-    { id: 1, name: "Luxe" },
-    { id: 2, name: "Romantique" }
-  ],
-  ratings: [
-    { id: 1, score: 5, comment: "Séjour exceptionnel, chambre magnifique!" },
-    { id: 2, score: 4, comment: "Très belle chambre, service impeccable." },
-    { id: 3, score: 5, comment: "Un luxe incroyable, je recommande vivement!" }
-  ],
-  // Images de la chambre (simulées)
-  images: [
-    {
-      id: 1,
-      url: "https://images.unsplash.com/photo-1618773928121-c32242e63f39?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=80",
-      alt: "Vue principale de la suite présidentielle"
-    },
-    {
-      id: 2,
-      url: "https://images.unsplash.com/photo-1591088398332-8a7791972843?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=80",
-      alt: "Chambre à coucher avec lit king-size"
-    },
-    {
-      id: 3,
-      url: "https://images.unsplash.com/photo-1584622650111-993a426fbf0a?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=80",
-      alt: "Salle de bain en marbre luxueuse"
-    },
-    {
-      id: 4,
-      url: "https://images.unsplash.com/photo-1578683010236-d716f9a3f461?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=80",
-      alt: "Salon séparé avec vue"
-    },
-    {
-      id: 5,
-      url: "https://images.unsplash.com/photo-1560624052-449f5ddf0c31?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=80",
-      alt: "Balcon privé avec vue panoramique"
-    }
-  ],
-  // Offre spéciale (simulée)
-  specialOffer: {
-    title: "Offre exceptionnelle",
-    discount: 15,
-    description: "Profitez de 15% de réduction pour un séjour de 3 nuits et plus! Offre valable jusqu'au 31 décembre.",
-    code: "LUXE15",
-    conditions: [
-      "Séjour minimum de 3 nuits",
-      "Non cumulable avec d'autres offres",
-      "Petit-déjeuner inclus",
-      "Annulation gratuite jusqu'à 48h avant le séjour"
-    ]
-  }
-});
-
 // État de chargement et gestion d'erreur
 const isLoading = ref(true);
 const error = ref(null);
 
+// Données de la chambre
+const room = ref({
+  name: "",
+  description: "",
+  pricePerNight: 0,
+  capacity: 0,
+  images: [],
+  ratings: [],
+  services: [],
+  ambiances: [],
+  hotel: { name: "" }
+});
 // État pour les actions utilisateur
 const isNegotiationModalOpen = ref(false);
 const selectedDates = ref({
@@ -103,29 +43,46 @@ const isGalleryOpen = ref(false);
 const offerCode = ref("");
 const isOfferCopied = ref(false);
 
+// Récupération des données de la chambre
+const fetchRoom = async () => {
+  try {
+    isLoading.value = true;
+    const response = await $fetch(`/api/room/${id}`);
+
+    console.log("Réponse de l'API:", response);
+
+    room.value = response;
+    error.value = null;
+
+  } catch (err) {
+    console.error(err);
+    error.value = "Erreur lors du chargement des données de la chambre.";
+  } finally {
+    isLoading.value = false;
+  }
+};
+
 // Calculer la note moyenne
 const averageRating = computed(() => {
-  if (!room.value.ratings || room.value.ratings.length === 0) {
-    return 0;
-  }
+  if (!room.value?.ratings?.length) return 0;
   const total = room.value.ratings.reduce((sum, rating) => sum + rating.score, 0);
   return (total / room.value.ratings.length).toFixed(1);
 });
 
 // Prix réduit avec l'offre spéciale
 const discountedPrice = computed(() => {
-  const price = parseFloat(room.value.pricePerNight);
-  const discount = room.value.specialOffer.discount / 100;
-  return (price * (1 - discount)).toFixed(2);
+  const price = parseFloat(room.value?.pricePerNight || 0);
+  const discount = room.value?.specialOffer?.discount || 0;
+  return (price * (1 - discount / 100)).toFixed(2);
 });
 
-// Prix suggéré (légèrement inférieur au prix normal)
+// Prix suggéré (10% de réduction)
 const suggestedPrice = computed(() => {
-  const originalPrice = parseFloat(room.value.pricePerNight);
-  return (originalPrice * 0.9).toFixed(2); // 10% de réduction suggérée
+  const price = parseFloat(room.value?.pricePerNight || 0);
+  return (price * 0.9).toFixed(2);
 });
 
-// Calcul du nombre de nuits entre deux dates
+// Calcul du nombre de nuits
 const calculateNights = (checkIn, checkOut) => {
   if (!checkIn || !checkOut) return 0;
   const start = new Date(checkIn);
@@ -134,33 +91,31 @@ const calculateNights = (checkIn, checkOut) => {
   return Math.ceil(diffTime / (1000 * 60 * 60 * 24));
 };
 
-// Mettre à jour le nombre de nuits et le prix total lors du changement de dates
+// Mise à jour des nuits et du total
 const updateNightsAndTotal = () => {
   negotiationOffer.value.numberOfNights = calculateNights(
-    selectedDates.value.checkIn, 
-    selectedDates.value.checkOut
+      selectedDates.value.checkIn,
+      selectedDates.value.checkOut
   );
-  
+
   if (negotiationOffer.value.pricePerNight && negotiationOffer.value.numberOfNights > 0) {
     negotiationOffer.value.totalPrice = (
-      parseFloat(negotiationOffer.value.pricePerNight) * negotiationOffer.value.numberOfNights
+        parseFloat(negotiationOffer.value.pricePerNight) *
+        negotiationOffer.value.numberOfNights
     ).toFixed(2);
   } else {
     negotiationOffer.value.totalPrice = 0;
   }
 };
 
-// Surveillance des changements de dates pour mettre à jour le nombre de nuits
+// Watchers
 watch(() => selectedDates.value.checkIn, updateNightsAndTotal);
 watch(() => selectedDates.value.checkOut, updateNightsAndTotal);
 watch(() => negotiationOffer.value.pricePerNight, updateNightsAndTotal);
 
+// Montage et démontage
 onMounted(() => {
-  // Simulation d'un temps de chargement
-  setTimeout(() => {
-    isLoading.value = false;
-  }, 1000);
-  
+  fetchRoom();
   window.addEventListener('keydown', handleKeyDown);
 });
 
@@ -168,13 +123,9 @@ onUnmounted(() => {
   window.removeEventListener('keydown', handleKeyDown);
 });
 
-// Fonctions
+// Modale de négociation
 const openNegotiationModal = () => {
-  // Réinitialiser les champs
-  selectedDates.value = {
-    checkIn: null,
-    checkOut: null
-  };
+  selectedDates.value = { checkIn: null, checkOut: null };
   negotiationOffer.value = {
     pricePerNight: suggestedPrice.value,
     numberOfNights: 0,
@@ -188,7 +139,6 @@ const closeNegotiationModal = () => {
 };
 
 const submitNegotiationOffer = () => {
-  // Simuler l'envoi de l'offre à l'API
   console.log("Offre envoyée:", {
     roomId: id,
     checkIn: selectedDates.value.checkIn,
@@ -197,20 +147,20 @@ const submitNegotiationOffer = () => {
     numberOfNights: negotiationOffer.value.numberOfNights,
     totalPrice: negotiationOffer.value.totalPrice
   });
-  
+
   alert(`Votre offre de ${negotiationOffer.value.totalPrice}€ (${negotiationOffer.value.pricePerNight}€/nuit) a été envoyée à l'hôtel. Vous recevrez une réponse sous 24h.`);
   closeNegotiationModal();
 };
 
+// Redirection vers l'hôtel
 const navigateToHotel = () => {
   navigateTo(`/hotel/${room.value.hotel.id}`);
 };
 
-// Fonctions de la galerie
+// Galerie d'images
 const openGallery = (index = 0) => {
   currentImageIndex.value = index;
   isGalleryOpen.value = true;
-  // Empêcher le défilement du body quand la galerie est ouverte
   document.body.style.overflow = 'hidden';
 };
 
@@ -227,17 +177,22 @@ const prevImage = () => {
   currentImageIndex.value = (currentImageIndex.value - 1 + room.value.images.length) % room.value.images.length;
 };
 
-// Gestion des touches pour la navigation
+// Gestion clavier pour la galerie
 const handleKeyDown = (e) => {
   if (!isGalleryOpen.value) return;
-  
+
   if (e.key === 'ArrowRight') nextImage();
   else if (e.key === 'ArrowLeft') prevImage();
   else if (e.key === 'Escape') closeGallery();
 };
+
+console.log(room);
 </script>
 
+
 <template>
+
+
   <div v-if="isLoading" class="flex justify-center items-center h-screen">
     <div class="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
   </div>
@@ -278,7 +233,7 @@ const handleKeyDown = (e) => {
         <div class="flex justify-center -mt-10 relative z-10 px-4">
           <div class="bg-white p-2 rounded-lg shadow-lg flex space-x-2 overflow-x-auto max-w-full">
             <div 
-              v-for="(image, index) in room.images.slice(1, 5)" 
+              v-for="(image, index) in room.images?.slice(1, 5)"
               :key="image.id"
               class="w-20 h-20 flex-shrink-0 rounded-md overflow-hidden cursor-pointer hover:opacity-80 transition"
               @click="openGallery(index + 1)"
@@ -286,17 +241,17 @@ const handleKeyDown = (e) => {
               <img :src="image.url" :alt="image.alt" class="w-full h-full object-cover" />
             </div>
             <div 
-              v-if="room.images.length > 5"
+              v-if="room.images?.length > 5"
               class="w-20 h-20 flex-shrink-0 rounded-md overflow-hidden cursor-pointer bg-black bg-opacity-50 flex items-center justify-center text-white font-semibold"
               @click="openGallery(0)"
             >
-              + {{ room.images.length - 5 }}
+              + {{ room.images?.length - 5 }}
             </div>
           </div>
         </div>
 
         <div class="absolute top-6 left-6 text-white z-10">
-          <h1 class="text-3xl md:text-4xl font-bold shadow-text">{{ room.name }}</h1>
+          <h1 class="text-3xl md:text-4xl font-bold shadow-text">{{ room?.hotel?.name }}</h1>
           <div class="flex items-center mt-2">
             <div class="flex items-center mr-4">
               <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-yellow-400" viewBox="0 0 20 20" fill="currentColor">
@@ -318,7 +273,7 @@ const handleKeyDown = (e) => {
             <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" viewBox="0 0 20 20" fill="currentColor">
               <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
             </svg>
-            {{ room.hotel.name }}
+            {{ room?.hotel?.name }}
           </button>
         </div>
       </div>
@@ -329,8 +284,8 @@ const handleKeyDown = (e) => {
         <div class="lg:col-span-2 space-y-6">
           <!-- Description -->
           <div class="bg-white rounded-lg p-6 shadow-sm border">
-            <h2 class="text-2xl font-semibold mb-4 text-gray-800">Description</h2>
-            <p class="text-gray-700 leading-relaxed">{{ room.description }}</p>
+            <h2 class="text-2xl font-semibold mb-4 text-gray-800">{{ room?.description }}</h2>
+            <p class="text-gray-700 leading-relaxed">{{ room?.description }}</p>
           </div>
 
           <!-- Services -->
@@ -341,7 +296,7 @@ const handleKeyDown = (e) => {
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-green-500 mr-2" viewBox="0 0 20 20" fill="currentColor">
                   <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
                 </svg>
-                <span>{{ service.name }}</span>
+                <span>{{ room?.hotel?.name }}</span>
               </div>
             </div>
           </div>
@@ -362,7 +317,7 @@ const handleKeyDown = (e) => {
             </div>
             <div class="grid grid-cols-2 md:grid-cols-3 gap-4">
               <div 
-                v-for="(image, index) in room.images.slice(0, 6)" 
+                v-for="(image, index) in room.images?.slice(0, 6)"
                 :key="image.id" 
                 class="relative aspect-square rounded-lg overflow-hidden cursor-pointer group"
                 @click="openGallery(index)"
