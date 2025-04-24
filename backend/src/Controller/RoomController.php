@@ -13,7 +13,7 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 
 #[Route('/api/refresh-token', name: 'app_refresh_token_')]
-final class RefreshTokenController extends AbstractController
+final class RoomController extends AbstractController
 {
     #[Route('', name: 'index', methods: ['GET'])]
     public function index(RefreshTokenRepository $repository): JsonResponse
