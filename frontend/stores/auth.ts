@@ -87,7 +87,8 @@ export const useAuthStore = defineStore('auth', {
               }
             }
           },
-          async verifyEmail(token) {
+        
+        async verifyEmail(token) {
             try {
               const response = await $fetch('api/verify/email', {
                 method: 'POST',
@@ -122,19 +123,13 @@ export const useAuthStore = defineStore('auth', {
                     method: 'POST',
                     credentials: 'include',
                 });
-
-                const authCookie = useCookie('auth');
-                const bearerCookie = useCookie('BEARER');
-                
-                authCookie.value = null;
-                bearerCookie.value = null;
                 
                 this.user = null;
             } catch (error) {
                 console.error('Erreur lors de la déconnexion:', error);
+                throw error;
             } finally {
                 this.isLoading = false;
-                window.location.href = '/';
             }
         },
         
