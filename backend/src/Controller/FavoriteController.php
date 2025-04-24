@@ -53,37 +53,42 @@ final class FavoriteController extends AbstractController
         EntityManagerInterface $em,
         UserRepository $userRepo,
         HotelRepository $hotelRepo,
-        RoomRepository $roomRepo
+        RoomRepository $roomRepo,
+        FavoriteRepository $favoriteRepo
     ): JsonResponse {
         $data = json_decode($request->getContent(), true);
-
+    
+        $user = isset($data['userId']) ? $userRepo->find($data['userId']) : null;
+        $hotel = isset($data['hotelId']) ? $hotelRepo->find($data['hotelId']) : null;
+        $room = isset($data['roomId']) ? $roomRepo->find($data['roomId']) : null;
+    
+        $existingFavorite = $favoriteRepo->findOneBy([
+            'userId' => $user,
+            'hotelId' => $hotel,
+            'roomId' => $room,
+        ]);
+    
+        if ($existingFavorite) {
+            return $this->json([
+                'message' => 'Ce favori existe déjà.',
+            ], Response::HTTP_CONFLICT);
+        }
+    
         $favorite = new Favorite();
         $favorite->setAddedDate(new \DateTime($data['addedDate'] ?? 'now'));
-
-        if (isset($data['userId'])) {
-            $user = $userRepo->find($data['userId']);
-            $favorite->setUserId($user);
-        }
-
-        if (isset($data['hotelId'])) {
-            $hotel = $hotelRepo->find($data['hotelId']);
-            $favorite->setHotelId($hotel);
-        }
-
-        if (isset($data['roomId'])) {
-            $room = $roomRepo->find($data['roomId']);
-            $favorite->setRoomId($room);
-        }
-
+        $favorite->setUserId($user);
+        $favorite->setHotelId($hotel);
+        $favorite->setRoomId($room);
+    
         $em->persist($favorite);
         $em->flush();
-
+    
         return $this->json([
             'message' => 'Favori ajouté avec succès',
             'id' => $favorite->getId(),
         ], Response::HTTP_CREATED);
     }
-
+    
     #[Route('/{id}', name: 'update', methods: ['PUT'])]
     public function update(
         Request $request,
