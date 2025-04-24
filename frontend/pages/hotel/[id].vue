@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
-import { useAuthStore } from '@/stores/auth';
+import { useAuthStore } from '~/stores/auth';
 
 const route = useRoute();
 const router = useRouter();
@@ -125,9 +125,9 @@ onMounted(() => {
           </div>
         </div>
       </div>
-      
+
       <div class="absolute top-4 right-4">
-        <button 
+        <button
           @click="toggleFavorite"
           class="flex items-center justify-center p-2 rounded-full bg-white shadow-md hover:bg-gray-100 transition-colors"
           :class="{ 'text-red-500': isFavorite, 'text-gray-400': !isFavorite }"
@@ -138,7 +138,7 @@ onMounted(() => {
         </button>
       </div>
     </div>
-    
+
     <div class="mt-6">
       <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div class="lg:col-span-2">
@@ -146,14 +146,14 @@ onMounted(() => {
             <h2 class="text-2xl font-semibold mb-4 text-gray-800">À propos de cet établissement</h2>
             <p class="text-gray-700 leading-relaxed">{{ hotel.description }}</p>
           </div>
-          
+
           <div class="bg-white rounded-lg p-6 shadow-md my-6">
             <h2 class="text-2xl font-semibold mb-4 text-gray-800">Chambres disponibles</h2>
-            
+
             <div v-if="rooms.length === 0" class="text-gray-500 italic">
               Aucune chambre disponible pour le moment.
             </div>
-            
+
             <div v-else class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               <div v-for="room in rooms" :key="room.id" class="border rounded-lg overflow-hidden transition-transform hover:scale-105">
                 <div class="h-48 bg-gray-200"
@@ -173,7 +173,7 @@ onMounted(() => {
             </div>
           </div>
         </div>
-        
+
         <div class="lg:col-span-1">
           <div class="bg-white rounded-lg p-6 shadow-md sticky top-6">
             <h2 class="text-xl font-semibold mb-4">Contactez cet établissement</h2>
