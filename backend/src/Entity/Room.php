@@ -38,12 +38,12 @@ class Room
     #[Groups(['room:read'])]  // Ne pas inclure dans hotel:read pour éviter circularité
     private ?Hotel $hotel = null;
 
-    /**
-     * @var Collection<int, Service>
-     */
-    #[ORM\ManyToMany(targetEntity: Service::class, inversedBy: 'rooms')]
-    #[Groups(['room:read'])]
-    private Collection $service;
+//    /**
+//     * @var Collection<int, Service>
+//     */
+//    #[ORM\ManyToMany(targetEntity: Service::class, inversedBy: 'rooms')]
+//    #[Groups(['room:read'])]
+//    private Collection $service;
 
     /**
      * @var Collection<int, Ambiance>
@@ -90,9 +90,12 @@ class Room
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $image = null;
 
+    #[ORM\Column(nullable: true)]
+    private ?array $service = null;
+
     public function __construct()
     {
-        $this->service = new ArrayCollection();
+//        $this->service = new ArrayCollection();
         $this->ambiance = new ArrayCollection();
         $this->bookings = new ArrayCollection();
         $this->offers = new ArrayCollection();
@@ -166,29 +169,29 @@ class Room
         return $this;
     }
 
-    /**
-     * @return Collection<int, Service>
-     */
-    public function getService(): Collection
-    {
-        return $this->service;
-    }
-
-    public function addService(Service $service): static
-    {
-        if (!$this->service->contains($service)) {
-            $this->service->add($service);
-        }
-
-        return $this;
-    }
-
-    public function removeService(Service $service): static
-    {
-        $this->service->removeElement($service);
-
-        return $this;
-    }
+//    /**
+//     * @return Collection<int, Service>
+//     */
+//    public function getService(): Collection
+//    {
+//        return $this->service;
+//    }
+//
+//    public function addService(Service $service): static
+//    {
+//        if (!$this->service->contains($service)) {
+//            $this->service->add($service);
+//        }
+//
+//        return $this;
+//    }
+//
+//    public function removeService(Service $service): static
+//    {
+//        $this->service->removeElement($service);
+//
+//        return $this;
+//    }
 
     /**
      * @return Collection<int, Ambiance>
@@ -372,6 +375,18 @@ class Room
     public function setImage(string $image): static
     {
         $this->image = $image;
+
+        return $this;
+    }
+
+    public function getService(): ?array
+    {
+        return $this->service;
+    }
+
+    public function setService(?array $service): static
+    {
+        $this->service = $service;
 
         return $this;
     }
