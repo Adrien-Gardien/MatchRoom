@@ -13,6 +13,8 @@ services:
         image: registry.nassimlounadi.fr/nassimlounadi/matchroom-backend
         depends_on:
             - db
+        environment:
+            CORS_ALLOW_ORIGIN: '^https?://(localhost|127\.0\.0\.1|matchroom\.nassimlounadi\.fr)(:[0-9]+)?$'
 
     frontend:
         image: registry.nassimlounadi.fr/nassimlounadi/matchroom-frontend
