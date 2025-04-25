@@ -22,7 +22,7 @@ class HotelFixtures extends Fixture
 
     public function load(ObjectManager $manager): void
     {
-        $faker = Factory::create('fr_FR');
+        $faker = Factory::create("fr_FR");
 
         // Création de 10 utilisateurs propriétaires d'hôtels
         $users = [];
@@ -30,11 +30,11 @@ class HotelFixtures extends Fixture
             $user = new User();
             $user->setName($faker->name());
             $user->setEmail($faker->email());
-            $user->setRoles(['ROLE_OWNER']);
+            $user->setRoles(["ROLE_OWNER"]);
             
             $hashedPassword = $this->passwordHasher->hashPassword(
                 $user,
-                'password'
+                "password"
             );
             $user->setPassword($hashedPassword);
             
@@ -46,7 +46,7 @@ class HotelFixtures extends Fixture
         for ($i = 0; $i < 20; $i++) {
             $hotel = new Hotel();
             
-            $hotel->setName($faker->company() . ' Hotel');
+            $hotel->setName($faker->company() . " Hotel");
             $hotel->setDescription($faker->paragraph(3));
             $hotel->setAddress($faker->streetAddress());
             $hotel->setCity($faker->city());
@@ -77,7 +77,7 @@ class HotelFixtures extends Fixture
             for ($k = 0; $k < $roomCount; $k++) {
                 $room = new Room();
                 
-                $room->setName($faker->word() . ' Room');
+                $room->setName($faker->word() . " Room");
                 $room->setDescription($faker->paragraph(2));
                 $room->setCapacity(rand(1, 4));
                 $room->setPrice(rand(50, 500));
