@@ -48,7 +48,8 @@ class RoomFixtures extends Fixture
                 $room->setDescription($faker->paragraph(2));
                 $room->setPricePerNight($faker->randomFloat(2, 50, 300));
                 $room->setCapacity($faker->numberBetween(1, 5));
-                $room->setImage('https://picsum.photos/640/480?random=' . $i);
+                $randomImageNumber = $faker->numberBetween(1, 18);
+                $room->setImage("room-$randomImageNumber.jpg");
 
                 // Générer un tableau aléatoire de services
                 $services = $faker->randomElements($possibleServices, $faker->numberBetween(1, 6));

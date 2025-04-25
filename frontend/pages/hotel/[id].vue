@@ -92,7 +92,6 @@ onMounted(() => {
 const navigateToRoom = (roomId: number) => {
   router.push(`/room/${roomId}`);
 };
-
 </script>
 
 
@@ -163,15 +162,16 @@ const navigateToRoom = (roomId: number) => {
                     class="min-w-[300px] max-w-[300px] flex-shrink-0 border rounded-lg overflow-hidden transition-transform hover:scale-105 cursor-pointer"
                     @click="navigateToRoom(room.id)"
                 >
-                  <div class="h-48 bg-gray-200"
-                       :style="`background-image: url('/rooms/${room.image}'); background-size: cover; background-position: center;`">
+                  <div class="h-48 bg-gray-200  bg-cover bg-center"
+                       :style="{ backgroundImage: `url(/hotels/rooms/${room.image})` }">
                   </div>
                   <div class="p-4">
                     <h3 class="font-semibold text-lg mb-2">{{ room.name || 'Chambre' }}</h3>
-                    <p class="text-gray-700 text-sm mb-4">{{ room.description || 'Description non disponible' }}</p>
+                    <p class="text-gray-700 text-sm mb-4 h-16 overflow-hidden text-ellipsis .line-clamp-5">
+                      {{ room.description || 'Description non disponible' }}
+                    </p>
                     <div class="flex justify-between items-center">
-                      <span class="font-bold text-primary">{{ room.price ? `${room.price}€` : 'Prix sur demande' }}</span>
-                      <button class="bg-primary text-white px-4 py-2 rounded-md hover:bg-primary-dark transition">
+                      <button class="text-sm font-semibold text-hawkes-blue-light bg-everglade px-4 py-2 rounded-lg hover:bg-everglade-light transition-colors">
                         Réserver
                       </button>
                     </div>

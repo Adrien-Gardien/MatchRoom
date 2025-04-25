@@ -88,6 +88,7 @@ class Room
     private Collection $favorites;
 
     #[ORM\Column(length: 255, nullable: true)]
+    #[Groups(['room:read', 'hotel:read', 'favorite:read', 'booking:read', 'offer:read', 'rating:read'])]
     private ?string $image = null;
 
     #[ORM\Column(nullable: true)]
