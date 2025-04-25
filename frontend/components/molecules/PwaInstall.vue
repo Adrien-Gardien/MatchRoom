@@ -36,7 +36,7 @@ const installPwa = async () => {
   deferredPrompt.value.prompt();
   
   // Wait for the user to respond to the prompt
-  const { outcome } = await deferredPrompt.value.userChoice;
+  const { _outcome } = await deferredPrompt.value.userChoice;
   
   // We no longer need the prompt. Clear it
   deferredPrompt.value = null;
