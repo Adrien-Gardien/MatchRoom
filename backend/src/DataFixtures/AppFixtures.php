@@ -18,7 +18,6 @@ class AppFixtures extends Fixture
         $ambianceFixtures = new AmbianceFixtures();
         $badgeFixtures = new BadgeFixtures();
         $ratingFixtures = new RatingFixtures();
-        $serviceFixtures = new ServiceFixtures();
 
         $hotelFixtures->load($manager);
         $roomFixtures->load($manager);
@@ -26,6 +25,5 @@ class AppFixtures extends Fixture
         $ambianceFixtures->load($manager);
         $badgeFixtures->load($manager);
         $ratingFixtures->load($manager);
-        $serviceFixtures->load($manager);
     }
 }

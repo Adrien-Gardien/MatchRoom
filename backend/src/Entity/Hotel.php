@@ -63,6 +63,9 @@ class Hotel
     #[Groups(['hotel:read', 'room:read', 'favorite:read'])]
     private ?string $image = null;
 
+    #[ORM\Column(length: 255, nullable: true) ]
+    private ?string $ambiance = null;
+
     public function __construct()
     {
         $this->owners = new ArrayCollection();
@@ -233,6 +236,18 @@ class Hotel
     public function setImage(string $image): static
     {
         $this->image = $image;
+
+        return $this;
+    }
+
+    public function getAmbiance(): ?string
+    {
+        return $this->ambiance;
+    }
+
+    public function setAmbiance(string $ambiance): static
+    {
+        $this->ambiance = $ambiance;
 
         return $this;
     }
