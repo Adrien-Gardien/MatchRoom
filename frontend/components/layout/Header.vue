@@ -33,19 +33,18 @@ const logout = async () => {
           <a href="/" class="text-2xl font-bold text-everglade">MatchRoom</a>
         </div>
         
-        <!-- Navigation -->
-        <nav class="hidden md:flex items-center space-x-8">
-          <a href="/" class="text-quincy hover:text-burning-orange transition-colors">Accueil</a>
-          <a href="#" class="text-quincy hover:text-burning-orange transition-colors">Destinations</a>
-          <a href="#" class="text-quincy hover:text-burning-orange transition-colors">Comment ça marche</a>
-          <a href="#" class="text-quincy hover:text-burning-orange transition-colors">À propos</a>
-        </nav>
+    
         
         <!-- Auth Buttons -->
         <div class="flex items-center space-x-4">
           <template v-if="isAuthenticated">
             <div class="flex items-center space-x-4">
               <span class="text-quincy" v-if="user">{{ user.first_name }}</span>
+              <a href="/profile" class="p-2 rounded-full bg-cream text-everglade transition-colors">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                </svg>
+              </a>
               <button 
                 @click="logout"
                 class="px-4 py-2 rounded-lg bg-everglade text-colonial-white hover:bg-everglade-light transition-colors">

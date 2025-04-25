@@ -24,12 +24,12 @@
           </svg>
           <span class="text-sm font-medium text-quincy">{{ rating }}</span>
         </div>
-        <a 
-          :href="link" 
+        <div
           class="text-sm font-semibold text-hawkes-blue-light bg-everglade px-4 py-2 rounded-lg hover:bg-everglade-light transition-colors"
+          @click="navigateToHotel"
         >
           {{ buttonText }}
-        </a>
+        </div>
       </div>
     </div>
   </div>
@@ -75,10 +75,6 @@ const props = defineProps({
     type: String,
     default: 'Explorer'
   },
-  link: {
-    type: String,
-    default: '#'
-  }
 });
 
 const navigateToHotel = () => {
