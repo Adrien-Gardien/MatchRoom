@@ -148,11 +148,6 @@ const navigateToRoom = (roomId: number) => {
       <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div class="lg:col-span-2">
           <div class="bg-white rounded-lg p-6 shadow-md my-6">
-            <h2 class="text-2xl font-semibold mb-4 text-gray-800">À propos de cet établissement</h2>
-            <p class="text-gray-700 leading-relaxed">{{ hotel.description }}</p>
-          </div>
-
-          <div class="bg-white rounded-lg p-6 shadow-md my-6">
             <h2 class="text-2xl font-semibold mb-4 text-gray-800">Chambres disponibles</h2>
 
             <div v-if="rooms.length === 0" class="text-gray-500 italic">
@@ -185,6 +180,11 @@ const navigateToRoom = (roomId: number) => {
               </div>
             </div>
           </div>
+          <div class="bg-white rounded-lg p-6 shadow-md my-6">
+            <h2 class="text-2xl font-semibold mb-4 text-gray-800">À propos de cet établissement</h2>
+            <p class="text-gray-700 leading-relaxed">{{ hotel.description }}</p>
+          </div>
+
         </div>
 
         <div class="lg:col-span-1">
