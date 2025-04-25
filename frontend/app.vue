@@ -5,7 +5,9 @@
 </script>
 
 <template>
+    <OfflineAlert />
     <NuxtLayout name="default">
         <NuxtPage />
     </NuxtLayout>
+    <PwaInstall />
 </template>
