@@ -271,10 +271,9 @@ const getChildrenOffers = async () => {
       <div class="absolute inset-0 bg-gradient-to-r from-black/50 to-black/80 z-10"></div>
       <!-- Background image -->
       <div 
-        v-if="room.images && room.images.length > 0" 
         class="absolute inset-0 bg-cover bg-center animate-subtle-zoom"
-        :style="`background-image: url('${room.images[0].url}')`"
-      ></div>
+        :style="{ backgroundImage: `url(/hotels/rooms/${room.image})` }">
+        ></div>
 
       <!-- Text & CTA -->
       <div class="relative z-20 flex flex-col items-start justify-end h-full text-colonial-white px-6 sm:px-8 lg:px-12 pb-20">
@@ -307,28 +306,6 @@ const getChildrenOffers = async () => {
       </div>
     </div>
 
-    <!-- Miniatures -->
-    <div class="relative -mt-12 z-30 flex justify-center px-4">
-      <div class="bg-[#FFF9E9]/80 backdrop-blur-sm shadow-lg rounded-xl overflow-hidden p-3 max-w-5xl">
-        <div class="flex space-x-3 overflow-x-auto py-2">
-          <div 
-            v-for="(image, index) in room.images?.slice(0, 5)"
-            :key="image.id"
-            class="w-20 h-20 flex-shrink-0 rounded-lg overflow-hidden cursor-pointer hover:opacity-80 transition transform hover:scale-105"
-            @click="openGallery(index)"
-          >
-            <img :src="image.url" :alt="image.alt" class="w-full h-full object-cover" />
-          </div>
-          <div 
-            v-if="room.images?.length > 5"
-            class="w-20 h-20 flex-shrink-0 rounded-lg overflow-hidden cursor-pointer bg-everglade bg-opacity-70 flex items-center justify-center text-colonial-white font-semibold transition transform hover:scale-105 hover:bg-opacity-80"
-            @click="openGallery(0)"
-          >
-            + {{ room.images?.length - 5 }}
-          </div>
-        </div>
-      </div>
-    </div>
     
     <!-- Corps de la page -->
     <div class="container mx-auto px-4 sm:px-6 lg:px-8 py-12">
@@ -354,32 +331,7 @@ const getChildrenOffers = async () => {
             </div>
           </div>
 
-          <!-- Galerie photo -->
-          <div class="bg-[#FFF9E9] rounded-xl p-6 shadow-sm">
-            <div class="flex justify-between items-center mb-6">
-              <h2 class="text-3xl font-semibold text-everglade">Galerie Photo</h2>
-              <button 
-                class="text-everglade hover:text-everglade-light flex items-center" 
-                @click="openGallery(0)"
-              >
-                Voir toutes les photos
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3" />
-                </svg>
-              </button>
-            </div>
-            <div class="grid grid-cols-2 md:grid-cols-3 gap-4">
-              <div 
-                v-for="(image, index) in room.images?.slice(0, 6)"
-                :key="image.id" 
-                class="relative aspect-square rounded-lg overflow-hidden cursor-pointer group"
-                @click="openGallery(index)"
-              >
-                <img :src="image.url" :alt="image.alt" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" />
-                <div class="absolute inset-0 bg-black opacity-0 group-hover:opacity-20 transition-opacity"></div>
-              </div>
-            </div>
-          </div>
+        
 
           <!-- Ambiances -->
           <div class="bg-[#FFF9E9] rounded-xl p-6 shadow-sm">

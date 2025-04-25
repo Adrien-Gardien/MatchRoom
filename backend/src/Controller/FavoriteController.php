@@ -37,6 +37,16 @@ final class FavoriteController extends AbstractController
         ]);
     }
 
+    #[Route('/user/{id}', name: 'show_by_user', methods: ['GET'])]
+    public function showByUser(FavoriteRepository $repository, int $id): JsonResponse
+    {
+        $favorites = $repository->findBy(['userId' => $id]);
+        return $this->json($favorites, 200, [], [
+            'groups' => ['favorite:read']
+        ]);
+    }
+    
+
     #[Route('', name: 'create', methods: ['POST'])]
     public function create(
         Request $request,

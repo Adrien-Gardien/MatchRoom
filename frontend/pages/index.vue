@@ -125,7 +125,7 @@ const goToHotelSearch = () => {
                 <h1
                     class="text-4xl sm:text-5xl md:text-6xl font-normal text-center mb-4 animate-fade-in drop-shadow-lg"
                 >
-                    Enchérissez sur votre Séjour de Rêve
+                    Enchérissez sur votre séjour de rêve
                 </h1>
                 <p class="text-lg sm:text-xl md:text-2xl text-center max-w-3xl mb-8 animate-slide-up">
                     Proposez votre prix pour des chambres d'hôtel de luxe et économisez jusqu'à 40%
