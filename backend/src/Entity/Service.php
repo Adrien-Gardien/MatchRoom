@@ -22,11 +22,11 @@ class Service
     #[ORM\Column(type: Types::TEXT)]
     private ?string $description = null;
 
-    /**
-     * @var Collection<int, Room>
-     */
-    #[ORM\ManyToMany(targetEntity: Room::class, mappedBy: 'service')]
-    private Collection $rooms;
+//    /**
+//     * @var Collection<int, Room>
+//     */
+//    #[ORM\ManyToMany(targetEntity: Room::class, mappedBy: 'service')]
+//    private Collection $rooms;
 
     /**
      * @var Collection<int, UserPreference>
@@ -36,7 +36,7 @@ class Service
 
     public function __construct()
     {
-        $this->rooms = new ArrayCollection();
+//        $this->rooms = new ArrayCollection();
         $this->userPreferences = new ArrayCollection();
     }
 
@@ -69,32 +69,32 @@ class Service
         return $this;
     }
 
-    /**
-     * @return Collection<int, Room>
-     */
-    public function getRooms(): Collection
-    {
-        return $this->rooms;
-    }
-
-    public function addRoom(Room $room): static
-    {
-        if (!$this->rooms->contains($room)) {
-            $this->rooms->add($room);
-            $room->addService($this);
-        }
-
-        return $this;
-    }
-
-    public function removeRoom(Room $room): static
-    {
-        if ($this->rooms->removeElement($room)) {
-            $room->removeService($this);
-        }
-
-        return $this;
-    }
+//    /**
+//     * @return Collection<int, Room>
+//     */
+//    public function getRooms(): Collection
+//    {
+//        return $this->rooms;
+//    }
+//
+//    public function addRoom(Room $room): static
+//    {
+//        if (!$this->rooms->contains($room)) {
+//            $this->rooms->add($room);
+//            $room->addService($this);
+//        }
+//
+//        return $this;
+//    }
+//
+//    public function removeRoom(Room $room): static
+//    {
+//        if ($this->rooms->removeElement($room)) {
+//            $room->removeService($this);
+//        }
+//
+//        return $this;
+//    }
 
     /**
      * @return Collection<int, UserPreference>

@@ -20,8 +20,35 @@ class HotelFixtures extends Fixture
             $hotel->setCity($faker->city);
             $hotel->setCountry($faker->country);
             $hotel->setDescription($faker->paragraph(3));
-            $hotel->setImage('https://picsum.photos/640/480?random=' . $i);
-
+            $randomImageNumber = $faker->numberBetween(1, 18);
+            $hotel->setImage("hotel-$randomImageNumber.jpg");
+            $hotel->setAmbiance($faker->randomElement([
+                'Chic',
+                'Moderne',
+                'Chaleureuse',
+                'Luxueuse',
+                'Minimaliste',
+                'Bohème',
+                'Vintage',
+                'Écologique',
+                'Romantique',
+                'Urbaine',
+                'Zen',
+                'Maritime',
+                'Montagnarde',
+                'Tropicale',
+                'Historique',
+                'Futuriste',
+                'Industrielle',
+                'Rustique',
+                'Ethnique',
+                'Glamour',
+                'Sportive',
+                'Gastronomique',
+                'Culturelle',
+                'Professionnelle',
+                'Festive'
+            ]));
             $manager->persist($hotel);
         }
 

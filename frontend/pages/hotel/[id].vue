@@ -111,7 +111,7 @@ onMounted(() => {
         <div class="relative h-64 md:h-80">
           <div
               class="absolute inset-0"
-              :style="`background-image: url('${hotel.image}'); background-size: cover; background-position: center;`">
+              :style="`background-image: url('/hotels/${hotel.image}'); background-size: cover; background-position: center;`">
           </div>
           <div class="absolute inset-0 bg-black opacity-40"></div>
           <div class="absolute bottom-0 left-0 p-6 text-white">
@@ -154,19 +154,26 @@ onMounted(() => {
               Aucune chambre disponible pour le moment.
             </div>
 
-            <div v-else class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              <div v-for="room in rooms" :key="room.id" class="border rounded-lg overflow-hidden transition-transform hover:scale-105">
-                <div class="h-48 bg-gray-200"
-                     :style="`background-image: url('${room.image}'); background-size: cover; background-position: center;`">
-                </div>
-                <div class="p-4">
-                  <h3 class="font-semibold text-lg mb-2">{{ room.name || 'Chambre' }}</h3>
-                  <p class="text-gray-700 text-sm mb-4">{{ room.description || 'Description non disponible' }}</p>
-                  <div class="flex justify-between items-center">
-                    <span class="font-bold text-primary">{{ room.price ? `${room.price}€` : 'Prix sur demande' }}</span>
-                    <button class="bg-primary text-white px-4 py-2 rounded-md hover:bg-primary-dark transition">
-                      Réserver
-                    </button>
+            <!-- Carrousel horizontal -->
+            <div v-else class="overflow-x-auto">
+              <div class="flex space-x-6 pb-4 min-w-fit">
+                <div
+                    v-for="room in rooms"
+                    :key="room.id"
+                    class="min-w-[300px] max-w-[300px] flex-shrink-0 border rounded-lg overflow-hidden transition-transform hover:scale-105"
+                >
+                  <div class="h-48 bg-gray-200"
+                       :style="`background-image: url('/rooms/${room.image}'); background-size: cover; background-position: center;`">
+                  </div>
+                  <div class="p-4">
+                    <h3 class="font-semibold text-lg mb-2">{{ room.name || 'Chambre' }}</h3>
+                    <p class="text-gray-700 text-sm mb-4">{{ room.description || 'Description non disponible' }}</p>
+                    <div class="flex justify-between items-center">
+                      <span class="font-bold text-primary">{{ room.price ? `${room.price}€` : 'Prix sur demande' }}</span>
+                      <button class="bg-primary text-white px-4 py-2 rounded-md hover:bg-primary-dark transition">
+                        Réserver
+                      </button>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -188,7 +195,7 @@ onMounted(() => {
               </div>
               <div>
                 <label class="block text-sm font-medium text-gray-700 mb-1">Message</label>
-                <textarea class="w-full p-2 border rounded-md h-24"></textarea>
+                <textarea class="w-full p-2 border rounded-md h-64"></textarea>
               </div>
               <button type="submit" class="w-full bg-primary text-white py-2 rounded-md hover:bg-primary-dark transition">
                 Envoyer

@@ -1,9 +1,9 @@
 <template>
   <div class="bg-white rounded-2xl p-0 shadow-lg overflow-hidden transform transition-all duration-300 hover:shadow-xl hover:-translate-y-2 cursor-pointer" @click="navigateToHotel">
     <div class="relative">
-      <div 
+      <div
         class="w-full h-48 bg-hawkes-blue bg-cover bg-center"
-        :style="{ backgroundImage: `url('${imageSrc}')` }"
+        :style="{ backgroundImage: `url('/hotels/${imageSrc}')` }"
       ></div>
       <div 
         class="absolute top-4 right-4 text-xs font-semibold px-3 py-1 rounded-full"
