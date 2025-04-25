@@ -5,6 +5,7 @@ import DiamondIcon from "~/components/atoms/icons/DiamondIcon.vue";
 import HomeIcon from "~/components/atoms/icons/HomeIcon.vue";
 import TicketIcon from "~/components/atoms/icons/TicketIcon.vue";
 import UserIcon from "~/components/atoms/icons/UserIcon.vue";
+import MessageIcon from '~/components/atoms/icons/MessageIcon.vue';
 
 type Link = {
     label: string
@@ -37,6 +38,11 @@ export const links: Link[] = [
         label: 'Réservation',
         link: '/hub/reservations',
         icon: TicketIcon
+    },
+    {
+        label: 'Négociations',
+        link: '/hub/negotiations',
+        icon: MessageIcon
     },
     {
         label: 'Offres',

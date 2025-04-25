@@ -3,9 +3,9 @@
 </script>
 
 <template>
-    <header class="w-full h-20 flex items-center z-10 fixed bg-primary">
+    <header class="w-full h-20 flex items-center z-10 fixed bg-primary border-b border-secondary">
         <div class="max-w-7xl w-full mx-auto flex justify-between">
-            <div class="cursor-pointer" @click="navigateTo('/')">
+            <div class="cursor-pointer flex items-center" @click="navigateTo('/')">
                 <p class="text-xl text-primary font-semibold">MatchRoom</p>
             </div>
             <nav class="flex items-center">

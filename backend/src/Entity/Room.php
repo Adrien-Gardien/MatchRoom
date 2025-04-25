@@ -53,6 +53,7 @@ class Room
 
     #[ORM\ManyToOne(inversedBy: 'rooms')]
     #[ORM\JoinColumn(nullable: false)]
+    #[Groups(['room_details'])]
     private ?Hotel $hotelId = null;
 
     /**

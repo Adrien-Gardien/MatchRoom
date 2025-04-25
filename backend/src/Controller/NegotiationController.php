@@ -38,6 +38,22 @@ final class NegotiationController extends AbstractController
         ], Response::HTTP_OK, [], ['groups' => 'negotiation:read']);
     }
     
+    #[Route('/negotiations/hotel-owner', name: 'app_negotiation_hotel_owner', methods: ['GET'])]
+    public function hotelOwnerNegotiations(): JsonResponse
+    {
+        $user = $this->getUser();
+        
+        if (!$user) {
+            return $this->json(['error' => 'User not authenticated'], Response::HTTP_UNAUTHORIZED);
+        }
+        
+        $negotiations = $this->negotiationRepository->findNegotiationsForHotelOwner($user);
+        
+        return $this->json([
+            'negotiations' => $negotiations,
+        ], Response::HTTP_OK, [], ['groups' => 'negotiation:read']);
+    }
+    
     #[Route('/negotiations/{id}', name: 'app_negotiation_show', methods: ['GET'])]
     public function show(int $id): JsonResponse
     {
@@ -56,6 +72,7 @@ final class NegotiationController extends AbstractController
     public function create(LoggerInterface $logger, Request $request, RoomRepository $roomRepository): JsonResponse
     {
         $data = json_decode($request->getContent(), true);
+        
         $roomId = $data['roomId'];
         $proposedPrice = $data['proposedPrice'];
 
@@ -90,7 +107,22 @@ final class NegotiationController extends AbstractController
         }
         
         $data = json_decode($request->getContent(), true);
+        
         // Update negotiation properties based on $data
+        if (isset($data['status'])) {
+            $status = $data['status'];
+            
+            if ($status === 'accepted') {
+                $negotiation->setStatus(NegotiationStatusEnum::ACCEPTED);
+            } elseif ($status === 'refused') {
+                $negotiation->setStatus(NegotiationStatusEnum::REFUSED);
+            } elseif ($status === 'counter_offer' && isset($data['counterPrice'])) {
+                $negotiation->setStatus(NegotiationStatusEnum::COUNTER_OFFER);
+                $negotiation->setProposedPrice($data['counterPrice']);
+            }
+        }
+        
+        $negotiation->setUpdatedAt(new DateTimeImmutable());
         
         $errors = $this->validator->validate($negotiation);
         if (count($errors) > 0) {

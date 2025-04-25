@@ -66,7 +66,9 @@
             } 
             return props.placeholder;
         } else {
-            return selectedOptions.value ? selectedOptions.value.label : props.placeholder;
+            // Check if selectedOptions.value exists and is a single object (not an array)
+            return selectedOptions.value && !Array.isArray(selectedOptions.value) ? 
+                selectedOptions.value.label : props.placeholder;
         }
     });
 

@@ -62,9 +62,9 @@ import type { Hotel } from '~/types/hotel';
 
 <template>
     <NuxtLayout name="customer">
-        <section v-if="hotel" class="my-20 h-full w-full">
-            <div class="max-w-7xl w-full mx-auto">
-                <img class="w-full rounded-2xl max-h-[550px] object-cover" :src="hotel.images[0].url" />
+        <section v-if="hotel" class="py-20 h-full w-full">
+            <div class="max-w-7xl pt-12 w-full mx-auto">
+                <img class="w-full rounded-xl max-h-60 object-cover" :src="hotel.images[0].url" />
                 <div class="flex justify-between mt-6">
                     <div class="w-2/3">
                         <h1 class="text-3xl font-semibold text-primary">{{ hotel.name }}</h1>

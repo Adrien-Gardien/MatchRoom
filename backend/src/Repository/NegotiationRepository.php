@@ -3,6 +3,7 @@
 namespace App\Repository;
 
 use App\Entity\Negotiation;
+use App\Entity\User;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
@@ -14,6 +15,22 @@ class NegotiationRepository extends ServiceEntityRepository
     public function __construct(ManagerRegistry $registry)
     {
         parent::__construct($registry, Negotiation::class);
+    }
+
+    /**
+     * Trouve toutes les négociations pour les chambres appartenant aux hôtels du propriétaire
+     */
+    public function findNegotiationsForHotelOwner(User $owner): array
+    {
+        return $this->createQueryBuilder('n')
+            ->join('n.roomId', 'r')
+            ->join('r.hotelId', 'h')
+            ->where('h.ownerId = :owner')
+            ->setParameter('owner', $owner)
+            ->orderBy('n.updatedAt', 'DESC')
+            ->getQuery()
+            ->getResult()
+        ;
     }
 
 //    /**

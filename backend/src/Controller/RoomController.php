@@ -4,6 +4,7 @@ namespace App\Controller;
 
 use App\Entity\Room;
 use App\Repository\RoomRepository;
+use App\Repository\ImageRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -12,6 +13,9 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Serializer\SerializerInterface;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
+use Symfony\Component\Serializer\Context\Normalizer\ObjectNormalizerContextBuilder;
+use Symfony\Component\Serializer\Normalizer\AbstractNormalizer;
+use Symfony\Component\Serializer\Normalizer\NormalizerInterface;
 
 #[Route('/api')]
 final class RoomController extends AbstractController
@@ -20,18 +24,153 @@ final class RoomController extends AbstractController
         private readonly EntityManagerInterface $entityManager,
         private readonly RoomRepository $roomRepository,
         private readonly SerializerInterface $serializer,
-        private readonly ValidatorInterface $validator
+        private readonly ValidatorInterface $validator,
+        private readonly NormalizerInterface $normalizer
     ) {
     }
 
     #[Route('/rooms', name: 'app_room_list', methods: ['GET'])]
-    public function index(): JsonResponse
+    public function index(Request $request, ImageRepository $imageRepository): JsonResponse
     {
-        $rooms = $this->roomRepository->findAll();
+        $amount = $request->query->get('amount');
         
-        return $this->json([
-            'data' => $rooms,
-        ], Response::HTTP_OK, [], ['groups' => 'room:read']);
+        // Récupérer les chambres
+        if ($amount) {
+            $rooms = $this->roomRepository->findFirstAmount((int) $amount);
+        } else {
+            $rooms = $this->roomRepository->findAll();
+        }
+        
+        // Extraire tous les IDs des chambres
+        $roomIds = array_map(function ($room) {
+            return $room->getId();
+        }, $rooms);
+        
+        // Récupérer toutes les images pour ces chambres en une seule requête
+        $imagesByRoomId = $imageRepository->findByMultipleRoomIds($roomIds);
+        
+        // Créer un tableau pour la réponse JSON
+        $response = [];
+        
+        foreach ($rooms as $room) {
+            $roomId = $room->getId();
+            
+            // Construction du contexte de normalisation pour éviter les références circulaires
+            $context = (new ObjectNormalizerContextBuilder())
+                ->withCircularReferenceHandler(function ($object) {
+                    return $object->getId();
+                })
+                ->withGroups(['room_details'])
+                ->withSkipNullValues(true)
+                ->toArray();
+                
+            // Sérialiser la chambre sans ses images
+            $roomArray = $this->normalizer->normalize($room, 'json', array_merge(
+                $context, 
+                [AbstractNormalizer::IGNORED_ATTRIBUTES => ['images']]
+            ));
+            
+            // Ajouter les images manuellement
+            $roomArray['images'] = [];
+            if (isset($imagesByRoomId[$roomId])) {
+                $roomArray['images'] = $this->normalizer->normalize(
+                    $imagesByRoomId[$roomId], 
+                    'json', 
+                    [
+                        'groups' => ['image_list'],
+                        AbstractNormalizer::CIRCULAR_REFERENCE_HANDLER => function ($object) {
+                            return $object->getId();
+                        }
+                    ]
+                );
+            }
+            
+            // Ajouter l'hôtel lié à la chambre
+            $roomArray['hotel'] = $this->normalizer->normalize(
+                $room->getHotelId(),
+                'json',
+                [
+                    'groups' => ['hotel_list'],
+                    AbstractNormalizer::CIRCULAR_REFERENCE_HANDLER => function ($object) {
+                        return $object->getId();
+                    }
+                ]
+            );
+            
+            $response[] = $roomArray;
+        }
+
+        return new JsonResponse($response, Response::HTTP_OK);
+    }
+
+    #[Route('/rooms/random', name: 'app_room_random', methods: ['GET'])]
+    public function random(Request $request, ImageRepository $imageRepository): JsonResponse
+    {
+        $amount = $request->query->get('amount', 10); // Par défaut, 10 chambres aléatoires
+        
+        // Récupérer les chambres aléatoires
+        $rooms = $this->roomRepository->findRandomAvailable((int) $amount);
+        
+        // Extraire tous les IDs des chambres
+        $roomIds = array_map(function ($room) {
+            return $room->getId();
+        }, $rooms);
+        
+        // Récupérer toutes les images pour ces chambres en une seule requête
+        $imagesByRoomId = $imageRepository->findByMultipleRoomIds($roomIds);
+        
+        // Créer un tableau pour la réponse JSON
+        $response = [];
+        
+        foreach ($rooms as $room) {
+            $roomId = $room->getId();
+            
+            // Construction du contexte de normalisation pour éviter les références circulaires
+            $context = (new ObjectNormalizerContextBuilder())
+                ->withCircularReferenceHandler(function ($object) {
+                    return $object->getId();
+                })
+                ->withGroups(['room_details'])
+                ->withSkipNullValues(true)
+                ->toArray();
+                
+            // Sérialiser la chambre sans ses images
+            $roomArray = $this->normalizer->normalize($room, 'json', array_merge(
+                $context, 
+                [AbstractNormalizer::IGNORED_ATTRIBUTES => ['images']]
+            ));
+            
+            // Ajouter les images manuellement
+            $roomArray['images'] = [];
+            if (isset($imagesByRoomId[$roomId])) {
+                $roomArray['images'] = $this->normalizer->normalize(
+                    $imagesByRoomId[$roomId], 
+                    'json', 
+                    [
+                        'groups' => ['image_list'],
+                        AbstractNormalizer::CIRCULAR_REFERENCE_HANDLER => function ($object) {
+                            return $object->getId();
+                        }
+                    ]
+                );
+            }
+            
+            // Ajouter l'hôtel lié à la chambre
+            $roomArray['hotel'] = $this->normalizer->normalize(
+                $room->getHotelId(),
+                'json',
+                [
+                    'groups' => ['hotel_list'],
+                    AbstractNormalizer::CIRCULAR_REFERENCE_HANDLER => function ($object) {
+                        return $object->getId();
+                    }
+                ]
+            );
+            
+            $response[] = $roomArray;
+        }
+
+        return new JsonResponse($response, Response::HTTP_OK);
     }
     
     #[Route('/rooms/{id}', name: 'app_room_show', methods: ['GET'])]

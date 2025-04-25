@@ -50,7 +50,7 @@
                             class="w-full h-full object-cover blur-sm"
                         />
                     </div>
-                    <div class="text-center z-10">
+                    <div class="text-center z-[5]">
                         <h1 class="text-4xl font-semibold text-primary-on-brand">Négociez votre chambre d’hôtel</h1>
                         <p class="text-primary-on-brand text-lg">
                             Recherchez une chambre disponible aux dates et destinations de votre choix, Négociez et
