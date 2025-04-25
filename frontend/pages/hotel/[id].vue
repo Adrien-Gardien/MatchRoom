@@ -88,6 +88,11 @@ const navigateToHome = () => {
 onMounted(() => {
   fetchHotel();
 });
+
+const navigateToRoom = (roomId: number) => {
+  router.push(`/room/${roomId}`);
+};
+
 </script>
 
 
@@ -160,7 +165,8 @@ onMounted(() => {
                 <div
                     v-for="room in rooms"
                     :key="room.id"
-                    class="min-w-[300px] max-w-[300px] flex-shrink-0 border rounded-lg overflow-hidden transition-transform hover:scale-105"
+                    class="min-w-[300px] max-w-[300px] flex-shrink-0 border rounded-lg overflow-hidden transition-transform hover:scale-105 cursor-pointer"
+                    @click="navigateToRoom(room.id)"
                 >
                   <div class="h-48 bg-gray-200"
                        :style="`background-image: url('/rooms/${room.image}'); background-size: cover; background-position: center;`">
