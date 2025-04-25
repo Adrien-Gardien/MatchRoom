@@ -5,7 +5,6 @@ namespace App\Entity;
 use App\Repository\HotelRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
-use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Serializer\Annotation\Groups;
 
@@ -15,64 +14,67 @@ class Hotel
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
-    #[Groups(['hotel:read', 'room:read', 'favorite:read', 'user:read'])]
+    #[Groups(['hotel_list', 'hotel_details'])]
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
-    #[Groups(['hotel:read', 'room:read', 'favorite:read', 'user:read'])]
+    #[Groups(['hotel_list', 'hotel_details'])]
     private ?string $name = null;
 
     #[ORM\Column(length: 255)]
-    #[Groups(['hotel:read', 'room:read', 'favorite:read'])]
+    #[Groups(['hotel_list', 'hotel_details'])]
+    private ?string $description = null;
+
+    #[ORM\Column(length: 255)]
+    #[Groups(['hotel_list', 'hotel_details'])]
     private ?string $address = null;
 
     #[ORM\Column(length: 255)]
-    #[Groups(['hotel:read', 'room:read', 'favorite:read'])]
+    #[Groups(['hotel_list', 'hotel_details'])]
     private ?string $city = null;
 
+    #[ORM\Column]
+    #[Groups(['hotel_list', 'hotel_details'])]
+    private ?int $zipCode = null;
+
     #[ORM\Column(length: 255)]
-    #[Groups(['hotel:read', 'room:read', 'favorite:read'])]
+    #[Groups(['hotel_list', 'hotel_details'])]
     private ?string $country = null;
 
-    #[ORM\Column(type: Types::TEXT)]
-    #[Groups(['hotel:read'])]
-    private ?string $description = null;
+    #[ORM\ManyToOne(inversedBy: 'hotels')]
+    #[ORM\JoinColumn(nullable: false)]
+    #[Groups(['hotel_details'])]
+    private ?User $ownerId = null;
 
     /**
-     * @var Collection<int, User>
+     * @var Collection<int, Image>
      */
-    #[ORM\OneToMany(targetEntity: User::class, mappedBy: 'hotel')]
-    #[Groups(['hotel:read'])]  // Ne pas inclure dans user:read pour éviter circularité
-    private Collection $owners;
+    #[ORM\OneToMany(targetEntity: Image::class, mappedBy: 'hotel', orphanRemoval: true)]
+    #[Groups(['hotel_list', 'hotel_details'])]
+    private Collection $images;
 
     /**
      * @var Collection<int, Room>
      */
-    #[ORM\OneToMany(targetEntity: Room::class, mappedBy: 'hotel')]
-    #[Groups(['hotel:read'])]  // Ne pas inclure dans room:read pour éviter circularité
+    #[ORM\OneToMany(targetEntity: Room::class, mappedBy: 'hotelId', orphanRemoval: true)]
     private Collection $rooms;
-
-    /**
-     * @var Collection<int, Favorite>
-     */
-    #[ORM\OneToMany(targetEntity: Favorite::class, mappedBy: 'hotelId')]
-    #[Groups(['hotel:read'])]  // Ne pas inclure dans favorite:read pour éviter circularité
-    private Collection $favorites;
-
-    #[ORM\Column(length: 255)]
-    #[Groups(['hotel:read', 'room:read', 'favorite:read'])]
-    private ?string $image = null;
 
     public function __construct()
     {
-        $this->owners = new ArrayCollection();
+        $this->images = new ArrayCollection();
         $this->rooms = new ArrayCollection();
-        $this->favorites = new ArrayCollection();
     }
 
     public function getId(): ?int
     {
         return $this->id;
+    }
+
+    public function setId(int $id): static
+    {
+        $this->id = $id;
+
+        return $this;
     }
 
     public function getName(): ?string
@@ -83,6 +85,18 @@ class Hotel
     public function setName(string $name): static
     {
         $this->name = $name;
+
+        return $this;
+    }
+
+    public function getDescription(): ?string
+    {
+        return $this->description;
+    }
+
+    public function setDescription(string $description): static
+    {
+        $this->description = $description;
 
         return $this;
     }
@@ -111,6 +125,18 @@ class Hotel
         return $this;
     }
 
+    public function getZipCode(): ?int
+    {
+        return $this->zipCode;
+    }
+
+    public function setZipCode(int $zipCode): static
+    {
+        $this->zipCode = $zipCode;
+
+        return $this;
+    }
+
     public function getCountry(): ?string
     {
         return $this->country;
@@ -123,42 +149,42 @@ class Hotel
         return $this;
     }
 
-    public function getDescription(): ?string
+    public function getOwnerId(): ?User
     {
-        return $this->description;
+        return $this->ownerId;
     }
 
-    public function setDescription(string $description): static
+    public function setOwnerId(?User $ownerId): static
     {
-        $this->description = $description;
+        $this->ownerId = $ownerId;
 
         return $this;
     }
 
     /**
-     * @return Collection<int, User>
+     * @return Collection<int, Image>
      */
-    public function getOwners(): Collection
+    public function getImages(): Collection
     {
-        return $this->owners;
+        return $this->images;
     }
 
-    public function addOwner(User $owner): static
+    public function addImage(Image $image): static
     {
-        if (!$this->owners->contains($owner)) {
-            $this->owners->add($owner);
-            $owner->setHotel($this);
+        if (!$this->images->contains($image)) {
+            $this->images->add($image);
+            $image->setHotel($this);
         }
 
         return $this;
     }
 
-    public function removeOwner(User $owner): static
+    public function removeImage(Image $image): static
     {
-        if ($this->owners->removeElement($owner)) {
+        if ($this->images->removeElement($image)) {
             // set the owning side to null (unless already changed)
-            if ($owner->getHotel() === $this) {
-                $owner->setHotel(null);
+            if ($image->getHotel() === $this) {
+                $image->setHotel(null);
             }
         }
 
@@ -177,7 +203,7 @@ class Hotel
     {
         if (!$this->rooms->contains($room)) {
             $this->rooms->add($room);
-            $room->setHotel($this);
+            $room->setHotelId($this);
         }
 
         return $this;
@@ -187,52 +213,10 @@ class Hotel
     {
         if ($this->rooms->removeElement($room)) {
             // set the owning side to null (unless already changed)
-            if ($room->getHotel() === $this) {
-                $room->setHotel(null);
+            if ($room->getHotelId() === $this) {
+                $room->setHotelId(null);
             }
         }
-
-        return $this;
-    }
-
-    /**
-     * @return Collection<int, Favorite>
-     */
-    public function getFavorites(): Collection
-    {
-        return $this->favorites;
-    }
-
-    public function addFavorite(Favorite $favorite): static
-    {
-        if (!$this->favorites->contains($favorite)) {
-            $this->favorites->add($favorite);
-            $favorite->setHotelId($this);
-        }
-
-        return $this;
-    }
-
-    public function removeFavorite(Favorite $favorite): static
-    {
-        if ($this->favorites->removeElement($favorite)) {
-            // set the owning side to null (unless already changed)
-            if ($favorite->getHotelId() === $this) {
-                $favorite->setHotelId(null);
-            }
-        }
-
-        return $this;
-    }
-
-    public function getImage(): ?string
-    {
-        return $this->image;
-    }
-
-    public function setImage(string $image): static
-    {
-        $this->image = $image;
 
         return $this;
     }

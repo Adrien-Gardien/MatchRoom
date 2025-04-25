@@ -8,7 +8,7 @@ body,
     height: 100%;
     width: 100%;
     @apply bg-primary;
-    font-family: 'Poppins';
+    font-family: 'DM Sans';
 }
 
 input[type='number']::-webkit-inner-spin-button,
@@ -50,18 +50,18 @@ input[type='number']::-webkit-outer-spin-button {
     --transparent: rgba(255, 255, 255, 0);
 
     /* Brand Colors */
-    --brand-25: #fefaf5;
-    --brand-50: #fef6ee;
-    --brand-100: #fdead7;
-    --brand-200: #f9dbaf;
-    --brand-300: #f7b27a;
-    --brand-400: #f38744;
-    --brand-500: #ef6820;
-    --brand-600: #e04f16;
-    --brand-700: #b93815;
-    --brand-800: #932f19;
-    --brand-900: #772917;
-    --brand-950: #511c10;
+    --brand-25: #F6FEFC;
+    --brand-50: #F0FDF9;
+    --brand-100: #CCFBEF;
+    --brand-200: #99F6E0;
+    --brand-300: #5FE9D0;
+    --brand-400: #2ED3B7;
+    --brand-500: #15B79E;
+    --brand-600: #0E9384;
+    --brand-700: #107569;
+    --brand-800: #125D56;
+    --brand-900: #134E48;
+    --brand-950: #0A2926;
 
     /* Error Colors */
     --error-25: #fffbfa;

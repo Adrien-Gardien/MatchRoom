@@ -2,8 +2,7 @@ import { defineStore } from 'pinia';
 
 type User = {
     id: number;
-    firstName: string;
-    lastName: string;
+    name: string;
     email: string;
     roles: string[];
 };
@@ -72,47 +71,6 @@ export const useAuthStore = defineStore('auth', {
             }
         },
 
-        async register(payload) {
-            try {
-              await $fetch('/api/register', {
-                method: 'POST',
-                body: payload,
-              })
-
-              return { success: true }
-            } catch (err) {
-              return {
-                success: false,
-                errors: err.data?.message || 'Registration failed',
-              }
-            }
-          },
-        
-        async verifyEmail(token) {
-            try {
-              const response = await $fetch('api/verify/email', {
-                method: 'POST',
-                body: { token },
-                credentials: 'include',
-              })
-
-              if (response.success) {
-                return { success: true }
-              } else {
-                return {
-                  success: false,
-                  errors: response.message || 'Email verification failed',
-                }
-              }
-            } catch (err) {
-              const errorMessage = err?.data?.message || err.message || 'Request failed'
-              return {
-                success: false,
-                errors: errorMessage,
-              }
-            }
-          },
-
         async logout() {
             this.isLoading = true;
 
@@ -123,16 +81,16 @@ export const useAuthStore = defineStore('auth', {
                     method: 'POST',
                     credentials: 'include',
                 });
-                
+
                 this.user = null;
+                this.isAuthenticated = false;
             } catch (error) {
-                console.error('Erreur lors de la déconnexion:', error);
-                throw error;
+                console.error(error);
             } finally {
                 this.isLoading = false;
             }
         },
-        
+
         async refreshToken(): Promise<boolean> {
             try {
                 const { $api } = useNuxtApp();
@@ -146,6 +104,29 @@ export const useAuthStore = defineStore('auth', {
                 return false;
             }
         },
+
+        async register(fullName: string, email: string, password: string) {
+            try {
+                const { $api } = useNuxtApp();
+                const { error } = await useFetch($api('/api/register'), {
+                    method: 'POST',
+                    body: {
+                        fullName,
+                        email,
+                        password
+                    },
+                    credentials: 'include'
+                });
+
+                if (!error.value) {
+                    return { success: true }
+                }
+
+
+            } catch (error) {
+                console.log(error)
+            }
+        }
     },
 
     persist: true,

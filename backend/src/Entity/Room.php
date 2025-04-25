@@ -5,7 +5,6 @@ namespace App\Entity;
 use App\Repository\RoomRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
-use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Serializer\Annotation\Groups;
 
@@ -15,95 +14,76 @@ class Room
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
-    #[Groups(['room:read', 'hotel:read', 'favorite:read', 'booking:read', 'offer:read', 'rating:read'])]
+    #[Groups(['room_details'])]
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
-    #[Groups(['room:read', 'hotel:read', 'favorite:read', 'booking:read', 'offer:read', 'rating:read'])]
+    #[Groups(['room_details'])]
     private ?string $name = null;
 
-    #[ORM\Column(type: Types::TEXT)]
-    #[Groups(['room:read', 'hotel:read', 'favorite:read'])]
+    #[ORM\Column(length: 255)]
+    #[Groups(['room_details'])]
     private ?string $description = null;
 
-    #[ORM\Column(type: Types::DECIMAL, precision: 10, scale: 2)]
-    #[Groups(['room:read', 'hotel:read', 'favorite:read', 'booking:read', 'offer:read'])]
-    private ?string $pricePerNight = null;
-
     #[ORM\Column]
-    #[Groups(['room:read', 'hotel:read', 'favorite:read'])]
+    #[Groups(['room_details'])]
     private ?int $capacity = null;
 
-    #[ORM\ManyToOne(inversedBy: 'rooms')]
-    #[Groups(['room:read'])]  // Ne pas inclure dans hotel:read pour éviter circularité
-    private ?Hotel $hotel = null;
+    #[ORM\Column]
+    #[Groups(['room_details'])]
+    private ?int $price = null;
 
-    /**
-     * @var Collection<int, Service>
-     */
-    #[ORM\ManyToMany(targetEntity: Service::class, inversedBy: 'rooms')]
-    #[Groups(['room:read'])]
-    private Collection $service;
+    #[ORM\Column]
+    #[Groups(['room_details'])]
+    private ?bool $available = null;
 
-    /**
-     * @var Collection<int, Ambiance>
-     */
-    #[ORM\ManyToMany(targetEntity: Ambiance::class, inversedBy: 'rooms')]
-    #[Groups(['room:read'])]
-    private Collection $ambiance;
+    #[ORM\Column]
+    #[Groups(['room_details'])]
+    private ?\DateTimeImmutable $createdAt = null;
+
+    #[ORM\Column]
+    #[Groups(['room_details'])]
+    private ?\DateTimeImmutable $updatedAt = null;
 
     /**
      * @var Collection<int, Booking>
      */
-    #[ORM\OneToMany(targetEntity: Booking::class, mappedBy: 'roomId')]
-    #[Groups(['room:read'])]
+    #[ORM\OneToMany(targetEntity: Booking::class, mappedBy: 'roomId', orphanRemoval: true)]
     private Collection $bookings;
 
-    /**
-     * @var Collection<int, Offer>
-     */
-    #[ORM\OneToMany(targetEntity: Offer::class, mappedBy: 'roomId')]
-    #[Groups(['room:read'])]
-    private Collection $offers;
+    #[ORM\ManyToOne(inversedBy: 'rooms')]
+    #[ORM\JoinColumn(nullable: false)]
+    private ?Hotel $hotelId = null;
 
     /**
-     * @var Collection<int, Rating>
+     * @var Collection<int, Image>
      */
-    #[ORM\OneToMany(targetEntity: Rating::class, mappedBy: 'roomId')]
-    #[Groups(['room:read'])]
-    private Collection $ratings;
+    #[ORM\OneToMany(targetEntity: Image::class, mappedBy: 'room')]
+    private Collection $images;
 
     /**
-     * @var Collection<int, Matching>
+     * @var Collection<int, Negotiation>
      */
-    #[ORM\OneToMany(targetEntity: Matching::class, mappedBy: 'roomId')]
-    #[Groups(['room:read'])]
-    private Collection $matchings;
-
-    /**
-     * @var Collection<int, Favorite>
-     */
-    #[ORM\OneToMany(targetEntity: Favorite::class, mappedBy: 'roomId')]
-    #[Groups(['room:read'])]
-    private Collection $favorites;
-
-    #[ORM\Column(length: 255, nullable: true)]
-    private ?string $image = null;
+    #[ORM\OneToMany(targetEntity: Negotiation::class, mappedBy: 'roomId', orphanRemoval: true)]
+    private Collection $negotiations;
 
     public function __construct()
     {
-        $this->service = new ArrayCollection();
-        $this->ambiance = new ArrayCollection();
         $this->bookings = new ArrayCollection();
-        $this->offers = new ArrayCollection();
-        $this->ratings = new ArrayCollection();
-        $this->matchings = new ArrayCollection();
-        $this->favorites = new ArrayCollection();
+        $this->images = new ArrayCollection();
+        $this->negotiations = new ArrayCollection();
     }
 
     public function getId(): ?int
     {
         return $this->id;
+    }
+
+    public function setId(int $id): static
+    {
+        $this->id = $id;
+
+        return $this;
     }
 
     public function getName(): ?string
@@ -130,18 +110,6 @@ class Room
         return $this;
     }
 
-    public function getPricePerNight(): ?string
-    {
-        return $this->pricePerNight;
-    }
-
-    public function setPricePerNight(string $pricePerNight): static
-    {
-        $this->pricePerNight = $pricePerNight;
-
-        return $this;
-    }
-
     public function getCapacity(): ?int
     {
         return $this->capacity;
@@ -154,62 +122,50 @@ class Room
         return $this;
     }
 
-    public function getHotel(): ?Hotel
+    public function getPrice(): ?int
     {
-        return $this->hotel;
+        return $this->price;
     }
 
-    public function setHotel(?Hotel $hotel): static
+    public function setPrice(int $price): static
     {
-        $this->hotel = $hotel;
+        $this->price = $price;
 
         return $this;
     }
 
-    /**
-     * @return Collection<int, Service>
-     */
-    public function getService(): Collection
+    public function isAvailable(): ?bool
     {
-        return $this->service;
+        return $this->available;
     }
 
-    public function addService(Service $service): static
+    public function setAvailable(bool $available): static
     {
-        if (!$this->service->contains($service)) {
-            $this->service->add($service);
-        }
+        $this->available = $available;
 
         return $this;
     }
 
-    public function removeService(Service $service): static
+    public function getCreatedAt(): ?\DateTimeImmutable
     {
-        $this->service->removeElement($service);
+        return $this->createdAt;
+    }
+
+    public function setCreatedAt(\DateTimeImmutable $createdAt): static
+    {
+        $this->createdAt = $createdAt;
 
         return $this;
     }
 
-    /**
-     * @return Collection<int, Ambiance>
-     */
-    public function getAmbiance(): Collection
+    public function getUpdatedAt(): ?\DateTimeImmutable
     {
-        return $this->ambiance;
+        return $this->updatedAt;
     }
 
-    public function addAmbiance(Ambiance $ambiance): static
+    public function setUpdatedAt(\DateTimeImmutable $updatedAt): static
     {
-        if (!$this->ambiance->contains($ambiance)) {
-            $this->ambiance->add($ambiance);
-        }
-
-        return $this;
-    }
-
-    public function removeAmbiance(Ambiance $ambiance): static
-    {
-        $this->ambiance->removeElement($ambiance);
+        $this->updatedAt = $updatedAt;
 
         return $this;
     }
@@ -244,30 +200,42 @@ class Room
         return $this;
     }
 
-    /**
-     * @return Collection<int, Offer>
-     */
-    public function getOffers(): Collection
+    public function getHotelId(): ?Hotel
     {
-        return $this->offers;
+        return $this->hotelId;
     }
 
-    public function addOffer(Offer $offer): static
+    public function setHotelId(?Hotel $hotelId): static
     {
-        if (!$this->offers->contains($offer)) {
-            $this->offers->add($offer);
-            $offer->setRoomId($this);
+        $this->hotelId = $hotelId;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Image>
+     */
+    public function getImages(): Collection
+    {
+        return $this->images;
+    }
+
+    public function addImage(Image $image): static
+    {
+        if (!$this->images->contains($image)) {
+            $this->images->add($image);
+            $image->setRoom($this);
         }
 
         return $this;
     }
 
-    public function removeOffer(Offer $offer): static
+    public function removeImage(Image $image): static
     {
-        if ($this->offers->removeElement($offer)) {
+        if ($this->images->removeElement($image)) {
             // set the owning side to null (unless already changed)
-            if ($offer->getRoomId() === $this) {
-                $offer->setRoomId(null);
+            if ($image->getRoom() === $this) {
+                $image->setRoom(null);
             }
         }
 
@@ -275,103 +243,31 @@ class Room
     }
 
     /**
-     * @return Collection<int, Rating>
+     * @return Collection<int, Negotiation>
      */
-    public function getRatings(): Collection
+    public function getNegotiations(): Collection
     {
-        return $this->ratings;
+        return $this->negotiations;
     }
 
-    public function addRating(Rating $rating): static
+    public function addNegotiation(Negotiation $negotiation): static
     {
-        if (!$this->ratings->contains($rating)) {
-            $this->ratings->add($rating);
-            $rating->setRoomId($this);
+        if (!$this->negotiations->contains($negotiation)) {
+            $this->negotiations->add($negotiation);
+            $negotiation->setRoomId($this);
         }
 
         return $this;
     }
 
-    public function removeRating(Rating $rating): static
+    public function removeNegotiation(Negotiation $negotiation): static
     {
-        if ($this->ratings->removeElement($rating)) {
+        if ($this->negotiations->removeElement($negotiation)) {
             // set the owning side to null (unless already changed)
-            if ($rating->getRoomId() === $this) {
-                $rating->setRoomId(null);
+            if ($negotiation->getRoomId() === $this) {
+                $negotiation->setRoomId(null);
             }
         }
-
-        return $this;
-    }
-
-    /**
-     * @return Collection<int, Matching>
-     */
-    public function getMatchings(): Collection
-    {
-        return $this->matchings;
-    }
-
-    public function addMatching(Matching $matching): static
-    {
-        if (!$this->matchings->contains($matching)) {
-            $this->matchings->add($matching);
-            $matching->setRoomId($this);
-        }
-
-        return $this;
-    }
-
-    public function removeMatching(Matching $matching): static
-    {
-        if ($this->matchings->removeElement($matching)) {
-            // set the owning side to null (unless already changed)
-            if ($matching->getRoomId() === $this) {
-                $matching->setRoomId(null);
-            }
-        }
-
-        return $this;
-    }
-
-    /**
-     * @return Collection<int, Favorite>
-     */
-    public function getFavorites(): Collection
-    {
-        return $this->favorites;
-    }
-
-    public function addFavorite(Favorite $favorite): static
-    {
-        if (!$this->favorites->contains($favorite)) {
-            $this->favorites->add($favorite);
-            $favorite->setRoomId($this);
-        }
-
-        return $this;
-    }
-
-    public function removeFavorite(Favorite $favorite): static
-    {
-        if ($this->favorites->removeElement($favorite)) {
-            // set the owning side to null (unless already changed)
-            if ($favorite->getRoomId() === $this) {
-                $favorite->setRoomId(null);
-            }
-        }
-
-        return $this;
-    }
-
-    public function getImage(): ?string
-    {
-        return $this->image;
-    }
-
-    public function setImage(string $image): static
-    {
-        $this->image = $image;
 
         return $this;
     }

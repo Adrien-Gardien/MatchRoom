@@ -29,11 +29,13 @@
     });
 
     const titleByStatusCode: Record<number, string> = {
+        401: 'Unauthorized',
         404: 'We can’t find this page',
         500: 'Internal server error',
     };
 
     const subtitleByStatusCode: Record<number, string> = {
+        401: 'Sorry, you don\' have access to this page.',
         404: "The page you are looking for doesn't exist or has been moved.",
         500: "An error occured but don't worry this is not your fault.",
     };
@@ -59,3 +61,4 @@
         </section>
     </main>
 </template>
+

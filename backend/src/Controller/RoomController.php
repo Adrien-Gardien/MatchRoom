@@ -2,10 +2,7 @@
 
 namespace App\Controller;
 
-use App\Entity\RefreshToken;
 use App\Entity\Room;
-use App\Repository\RefreshTokenRepository;
-use App\Repository\UserRepository;
 use App\Repository\RoomRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -14,102 +11,133 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Serializer\SerializerInterface;
+use Symfony\Component\Validator\Validator\ValidatorInterface;
 
-#[Route('/api/room', name: 'app_room_')]
+#[Route('/api')]
 final class RoomController extends AbstractController
 {
-    
-    #[Route('/', name: 'index', methods: ['GET'])]
-    public function index(RoomRepository $repository): JsonResponse
-    {
-        $rooms = $repository->findAll();
-    
-        // Utiliser les groupes de sérialisation au lieu de mapper manuellement
-        return $this->json($rooms, 200, [], [
-            'groups' => ['room:read']
-        ]);
+    public function __construct(
+        private readonly EntityManagerInterface $entityManager,
+        private readonly RoomRepository $roomRepository,
+        private readonly SerializerInterface $serializer,
+        private readonly ValidatorInterface $validator
+    ) {
     }
 
-    // Get first 20 rooms
-    #[Route('/first-20', name: 'first-20', methods: ['GET'])]
-    public function first20(RoomRepository $repository): JsonResponse
+    #[Route('/rooms', name: 'app_room_list', methods: ['GET'])]
+    public function index(): JsonResponse
     {
-        $rooms = $repository->findBy([], null, 20);
+        $rooms = $this->roomRepository->findAll();
         
-        // Utiliser les groupes de sérialisation
-        return $this->json($rooms, 200, [], [
-            'groups' => ['room:read']
-        ]);
-    }
-
-    #[Route('/{id}', name: 'show', methods: ['GET'])]
-    public function show(Room $room): JsonResponse
-    {
-        // Utiliser les groupes de sérialisation
-        return $this->json($room, 200, [], [
-            'groups' => ['room:read']
-        ]);
-    }
-
-    #[Route('/', name: 'create', methods: ['POST'])]
-    public function create(
-        Request $request,
-        EntityManagerInterface $em,
-        UserRepository $userRepository
-    ): JsonResponse {
-        $data = json_decode($request->getContent(), true);
-
-        $token = new RefreshToken();
-        $token->setToken($data['token'] ?? '')
-              ->setExpiresAt(new \DateTime($data['expiresAt'] ?? '+1 day'));
-
-        if (isset($data['userId'])) {
-            $user = $userRepository->find($data['userId']);
-            $token->setUser($user);
-        }
-
-        $em->persist($token);
-        $em->flush();
-
         return $this->json([
-            'message' => 'Jeton de rafraîchissement créé avec succès',
-            'id' => $token->getId(),
-        ], Response::HTTP_CREATED);
+            'data' => $rooms,
+        ], Response::HTTP_OK, [], ['groups' => 'room:read']);
     }
-
-    #[Route('/{id}', name: 'update', methods: ['PUT'])]
-    public function update(
-        Request $request,
-        RefreshToken $token,
-        EntityManagerInterface $em,
-        UserRepository $userRepository
-    ): JsonResponse {
-        $data = json_decode($request->getContent(), true);
-
-        if (isset($data['token'])) {
-            $token->setToken($data['token']);
-        }
-
-        if (isset($data['expiresAt'])) {
-            $token->setExpiresAt(new \DateTime($data['expiresAt']));
-        }
-
-        if (isset($data['userId'])) {
-            $user = $userRepository->find($data['userId']);
-            $token->setUser($user);
-        }
-
-        $em->flush();
-
-        return $this->json(['message' => 'Jeton de rafraîchissement mis à jour avec succès']);
-    }
-
-    #[Route('/{id}', name: 'delete', methods: ['DELETE'])]
-    public function delete(RefreshToken $token, EntityManagerInterface $em): JsonResponse
+    
+    #[Route('/rooms/{id}', name: 'app_room_show', methods: ['GET'])]
+    public function show(int $id): JsonResponse
     {
-        $em->remove($token);
-        $em->flush();
-
-        return $this->json(['message' => 'Jeton de rafraîchissement supprimé avec succès']);
+        $room = $this->roomRepository->find($id);
+        
+        if (!$room) {
+            return $this->json(['message' => 'Room not found'], Response::HTTP_NOT_FOUND);
+        }
+        
+        return $this->json([
+            'data' => $room,
+        ], Response::HTTP_OK, [], ['groups' => 'room:read']);
+    }
+    
+    #[Route('/rooms', name: 'app_room_create', methods: ['POST'])]
+    public function create(Request $request): JsonResponse
+    {
+        $data = json_decode($request->getContent(), true);
+        
+        $room = new Room();
+        $room->setName($data['name'] ?? '');
+        $room->setDescription($data['description'] ?? '');
+        $room->setCapacity($data['capacity'] ?? 0);
+        $room->setPrice($data['price'] ?? 0);
+        $room->setAvailable($data['available'] ?? true);
+        $room->setCreatedAt(new \DateTimeImmutable());
+        $room->setUpdatedAt(new \DateTimeImmutable());
+        
+        $errors = $this->validator->validate($room);
+        if (count($errors) > 0) {
+            $errorsString = (string) $errors;
+            return $this->json(['message' => $errorsString], Response::HTTP_BAD_REQUEST);
+        }
+        
+        $this->entityManager->persist($room);
+        $this->entityManager->flush();
+        
+        return $this->json([
+            'message' => 'Room created successfully',
+            'data' => $room,
+        ], Response::HTTP_CREATED, [], ['groups' => 'room:read']);
+    }
+    
+    #[Route('/rooms/{id}', name: 'app_room_update', methods: ['PUT', 'PATCH'])]
+    public function update(Request $request, int $id): JsonResponse
+    {
+        $room = $this->roomRepository->find($id);
+        
+        if (!$room) {
+            return $this->json(['message' => 'Room not found'], Response::HTTP_NOT_FOUND);
+        }
+        
+        $data = json_decode($request->getContent(), true);
+        
+        if (isset($data['name'])) {
+            $room->setName($data['name']);
+        }
+        
+        if (isset($data['description'])) {
+            $room->setDescription($data['description']);
+        }
+        
+        if (isset($data['capacity'])) {
+            $room->setCapacity($data['capacity']);
+        }
+        
+        if (isset($data['price'])) {
+            $room->setPrice($data['price']);
+        }
+        
+        if (isset($data['available'])) {
+            $room->setAvailable($data['available']);
+        }
+        
+        $room->setUpdatedAt(new \DateTimeImmutable());
+        
+        $errors = $this->validator->validate($room);
+        if (count($errors) > 0) {
+            $errorsString = (string) $errors;
+            return $this->json(['message' => $errorsString], Response::HTTP_BAD_REQUEST);
+        }
+        
+        $this->entityManager->flush();
+        
+        return $this->json([
+            'message' => 'Room updated successfully',
+            'data' => $room,
+        ], Response::HTTP_OK, [], ['groups' => 'room:read']);
+    }
+    
+    #[Route('/rooms/{id}', name: 'app_room_delete', methods: ['DELETE'])]
+    public function delete(int $id): JsonResponse
+    {
+        $room = $this->roomRepository->find($id);
+        
+        if (!$room) {
+            return $this->json(['message' => 'Room not found'], Response::HTTP_NOT_FOUND);
+        }
+        
+        $this->entityManager->remove($room);
+        $this->entityManager->flush();
+        
+        return $this->json([
+            'message' => 'Room deleted successfully'
+        ], Response::HTTP_OK);
     }
 }

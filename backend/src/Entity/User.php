@@ -6,7 +6,6 @@ use App\Repository\UserRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
-use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Serializer\Annotation\Groups;
@@ -14,121 +13,72 @@ use Symfony\Component\Serializer\Annotation\Groups;
 #[ORM\Entity(repositoryClass: UserRepository::class)]
 #[ORM\Table(name: '`user`')]
 #[ORM\UniqueConstraint(name: 'UNIQ_IDENTIFIER_EMAIL', fields: ['email'])]
-#[UniqueEntity(fields: ['email'], message: 'There is already an account with this email')]
 class User implements UserInterface, PasswordAuthenticatedUserInterface
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
-    #[Groups(['user:read', 'favorite:read', 'booking:read', 'offer:read', 'rating:read', 'matching:read'])]
+    #[Groups(['hotel_details', 'user_list', 'user_details'])]
     /**
      * @phpstan-ignore-next-line
      */
     private ?int $id = null;
 
     #[ORM\Column(length: 180)]
-    #[Groups(['user:read', 'favorite:read', 'booking:read', 'offer:read', 'rating:read', 'matching:read'])]
+    #[Groups(['hotel_details', 'user_list', 'user_details'])]
     private ?string $email = null;
 
     /**
      * @var list<string> The user roles
      */
     #[ORM\Column]
-    #[Groups(['user:read'])]
+    #[Groups(['user_details'])]
     private array $roles = [];
 
     /**
      * @var string The hashed password
      */
     #[ORM\Column]
-    // Pas de groupe pour le mot de passe, il ne doit jamais être sérialisé
     private ?string $password = null;
-
-    #[ORM\Column(length: 255)]
-    #[Groups(['user:read', 'favorite:read', 'booking:read', 'offer:read', 'rating:read', 'matching:read'])]
-    private ?string $firstName = null;
-
-    #[ORM\Column(length: 255)]
-    #[Groups(['user:read', 'favorite:read', 'booking:read', 'offer:read', 'rating:read', 'matching:read'])]
-    private ?string $lastName = null;
-
-    #[ORM\ManyToOne(inversedBy: 'owners')]
-    #[Groups(['user:read'])]
-    private ?Hotel $hotel = null;
 
     /**
      * @var Collection<int, Booking>
      */
-    #[ORM\OneToMany(targetEntity: Booking::class, mappedBy: 'userId')]
-    #[Groups(['user:read'])]
+    #[ORM\OneToMany(targetEntity: Booking::class, mappedBy: 'userId', orphanRemoval: true)]
+    #[Groups(['user_details'])]
     private Collection $bookings;
 
     /**
-     * @var Collection<int, Offer>
+     * @var Collection<int, Hotel>
      */
-    #[ORM\OneToMany(targetEntity: Offer::class, mappedBy: 'userId')]
-    #[Groups(['user:read'])]
-    private Collection $offers;
-
-    /**
-     * @var Collection<int, Rating>
-     */
-    #[ORM\OneToMany(targetEntity: Rating::class, mappedBy: 'authorId')]
-    #[Groups(['user:read'])]
-    private Collection $ratings;
-
-    /**
-     * @var Collection<int, Matching>
-     */
-    #[ORM\OneToMany(targetEntity: Matching::class, mappedBy: 'userId')]
-    #[Groups(['user:read'])]
-    private Collection $matchings;
-
-    /**
-     * @var Collection<int, UserPreference>
-     */
-    #[ORM\OneToMany(targetEntity: UserPreference::class, mappedBy: 'userId')]
-    #[Groups(['user:read'])]
-    private Collection $userPreferences;
-
-    /**
-     * @var Collection<int, Favorite>
-     */
-    #[ORM\OneToMany(targetEntity: Favorite::class, mappedBy: 'userId')]
-    #[Groups(['user:read'])]
-    private Collection $favorites;
-
-    /**
-     * @var Collection<int, Search>
-     */
-    #[ORM\OneToMany(targetEntity: Search::class, mappedBy: 'userId')]
-    #[Groups(['user:read'])]
-    private Collection $searches;
-
-    /**
-     * @var Collection<int, UserBadge>
-     */
-    #[ORM\OneToMany(targetEntity: UserBadge::class, mappedBy: 'userId')]
-    #[Groups(['user:read'])]
-    private Collection $userBadges;
-
-    #[ORM\Column]
-    #[Groups(['user:read'])]
-    private bool $isVerified = false;
+    #[ORM\OneToMany(targetEntity: Hotel::class, mappedBy: 'ownerId')]
+    #[Groups(['user_details'])]
+    private Collection $hotels;
 
     #[ORM\Column(length: 255)]
-    private ?string $verificationCode = null;
+    #[Groups(['hotel_details', 'user_list', 'user_details'])]
+    private ?string $name = null;
+
+    /**
+     * @var Collection<int, Badge>
+     */
+    #[ORM\ManyToMany(targetEntity: Badge::class, mappedBy: 'userId')]
+    #[Groups(['user_details'])]
+    private Collection $badges;
+
+    /**
+     * @var Collection<int, Trophy>
+     */
+    #[ORM\ManyToMany(targetEntity: Trophy::class, mappedBy: 'userId')]
+    #[Groups(['user_details'])]
+    private Collection $trophies;
 
     public function __construct()
     {
         $this->bookings = new ArrayCollection();
-        $this->offers = new ArrayCollection();
-        $this->ratings = new ArrayCollection();
-        $this->matchings = new ArrayCollection();
-        $this->userPreferences = new ArrayCollection();
-        $this->favorites = new ArrayCollection();
-        $this->searches = new ArrayCollection();
-        $this->badgeId = new ArrayCollection();
+        $this->hotels = new ArrayCollection();
+        $this->badges = new ArrayCollection();
+        $this->trophies = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -206,42 +156,6 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         // $this->plainPassword = null;
     }
 
-    public function getFirstName(): ?string
-    {
-        return $this->firstName;
-    }
-
-    public function setFirstName(string $firstName): static
-    {
-        $this->firstName = $firstName;
-
-        return $this;
-    }
-
-    public function getLastName(): ?string
-    {
-        return $this->lastName;
-    }
-
-    public function setLastName(string $lastName): static
-    {
-        $this->lastName = $lastName;
-
-        return $this;
-    }
-
-    public function getHotel(): ?Hotel
-    {
-        return $this->hotel;
-    }
-
-    public function setHotel(?Hotel $hotel): static
-    {
-        $this->hotel = $hotel;
-
-        return $this;
-    }
-
     /**
      * @return Collection<int, Booking>
      */
@@ -273,235 +187,97 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     }
 
     /**
-     * @return Collection<int, Offer>
+     * @return Collection<int, Hotel>
      */
-    public function getOffers(): Collection
+    public function getHotels(): Collection
     {
-        return $this->offers;
+        return $this->hotels;
     }
 
-    public function addOffer(Offer $offer): static
+    public function addHotel(Hotel $hotel): static
     {
-        if (!$this->offers->contains($offer)) {
-            $this->offers->add($offer);
-            $offer->setUserId($this);
+        if (!$this->hotels->contains($hotel)) {
+            $this->hotels->add($hotel);
+            $hotel->setOwnerId($this);
         }
 
         return $this;
     }
 
-    public function removeOffer(Offer $offer): static
+    public function removeHotel(Hotel $hotel): static
     {
-        if ($this->offers->removeElement($offer)) {
+        if ($this->hotels->removeElement($hotel)) {
             // set the owning side to null (unless already changed)
-            if ($offer->getUserId() === $this) {
-                $offer->setUserId(null);
+            if ($hotel->getOwnerId() === $this) {
+                $hotel->setOwnerId(null);
             }
+        }
+
+        return $this;
+    }
+
+    public function getName(): ?string
+    {
+        return $this->name;
+    }
+
+    public function setName(string $name): static
+    {
+        $this->name = $name;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Badge>
+     */
+    public function getBadges(): Collection
+    {
+        return $this->badges;
+    }
+
+    public function addBadge(Badge $badge): static
+    {
+        if (!$this->badges->contains($badge)) {
+            $this->badges->add($badge);
+            $badge->addUserId($this);
+        }
+
+        return $this;
+    }
+
+    public function removeBadge(Badge $badge): static
+    {
+        if ($this->badges->removeElement($badge)) {
+            $badge->removeUserId($this);
         }
 
         return $this;
     }
 
     /**
-     * @return Collection<int, Rating>
+     * @return Collection<int, Trophy>
      */
-    public function getRatings(): Collection
+    public function getTrophies(): Collection
     {
-        return $this->ratings;
+        return $this->trophies;
     }
 
-    public function addRating(Rating $rating): static
+    public function addTrophy(Trophy $trophy): static
     {
-        if (!$this->ratings->contains($rating)) {
-            $this->ratings->add($rating);
-            $rating->setAuthorId($this);
+        if (!$this->trophies->contains($trophy)) {
+            $this->trophies->add($trophy);
+            $trophy->addUserId($this);
         }
 
         return $this;
     }
 
-    public function removeRating(Rating $rating): static
+    public function removeTrophy(Trophy $trophy): static
     {
-        if ($this->ratings->removeElement($rating)) {
-            // set the owning side to null (unless already changed)
-            if ($rating->getAuthorId() === $this) {
-                $rating->setAuthorId(null);
-            }
+        if ($this->trophies->removeElement($trophy)) {
+            $trophy->removeUserId($this);
         }
-
-        return $this;
-    }
-
-    /**
-     * @return Collection<int, Matching>
-     */
-    public function getMatchings(): Collection
-    {
-        return $this->matchings;
-    }
-
-    public function addMatching(Matching $matching): static
-    {
-        if (!$this->matchings->contains($matching)) {
-            $this->matchings->add($matching);
-            $matching->setUserId($this);
-        }
-
-        return $this;
-    }
-
-    public function removeMatching(Matching $matching): static
-    {
-        if ($this->matchings->removeElement($matching)) {
-            // set the owning side to null (unless already changed)
-            if ($matching->getUserId() === $this) {
-                $matching->setUserId(null);
-            }
-        }
-
-        return $this;
-    }
-
-    /**
-     * @return Collection<int, UserPreference>
-     */
-    public function getUserPreferences(): Collection
-    {
-        return $this->userPreferences;
-    }
-
-    public function addUserPreference(UserPreference $userPreference): static
-    {
-        if (!$this->userPreferences->contains($userPreference)) {
-            $this->userPreferences->add($userPreference);
-            $userPreference->setUserId($this);
-        }
-
-        return $this;
-    }
-
-    public function removeUserPreference(UserPreference $userPreference): static
-    {
-        if ($this->userPreferences->removeElement($userPreference)) {
-            // set the owning side to null (unless already changed)
-            if ($userPreference->getUserId() === $this) {
-                $userPreference->setUserId(null);
-            }
-        }
-
-        return $this;
-    }
-
-    /**
-     * @return Collection<int, Favorite>
-     */
-    public function getFavorites(): Collection
-    {
-        return $this->favorites;
-    }
-
-    public function addFavorite(Favorite $favorite): static
-    {
-        if (!$this->favorites->contains($favorite)) {
-            $this->favorites->add($favorite);
-            $favorite->setUserId($this);
-        }
-
-        return $this;
-    }
-
-    public function removeFavorite(Favorite $favorite): static
-    {
-        if ($this->favorites->removeElement($favorite)) {
-            // set the owning side to null (unless already changed)
-            if ($favorite->getUserId() === $this) {
-                $favorite->setUserId(null);
-            }
-        }
-
-        return $this;
-    }
-
-    /**
-     * @return Collection<int, Search>
-     */
-    public function getSearches(): Collection
-    {
-        return $this->searches;
-    }
-
-    public function addSearch(Search $search): static
-    {
-        if (!$this->searches->contains($search)) {
-            $this->searches->add($search);
-            $search->setUserId($this);
-        }
-
-        return $this;
-    }
-
-    public function removeSearch(Search $search): static
-    {
-        if ($this->searches->removeElement($search)) {
-            // set the owning side to null (unless already changed)
-            if ($search->getUserId() === $this) {
-                $search->setUserId(null);
-            }
-        }
-
-        return $this;
-    }
-
-    /**
-     * @return Collection<int, UserBadge>
-     */
-    public function getUserBadges(): Collection
-    {
-        return $this->userBadges;
-    }
-
-    public function addUserBadges(UserBadge $userBadge): static
-    {
-        if (!$this->userBadges->contains($userBadge)) {
-            $this->userBadges->add($userBadge);
-            $userBadge->setUserId($this);
-        }
-
-        return $this;
-    }
-
-    public function removeUserBadges(UserBadge $userBadge): static
-    {
-        if ($this->userBadges->removeElement($userBadge)) {
-            // set the owning side to null (unless already changed)
-            if ($userBadge->getUserId() === $this) {
-                $userBadge->setUserId(null);
-            }
-        }
-
-        return $this;
-    }
-
-    public function isVerified(): bool
-    {
-        return $this->isVerified;
-    }
-
-    public function setIsVerified(bool $isVerified): static
-    {
-        $this->isVerified = $isVerified;
-
-        return $this;
-    }
-
-    public function getVerificationCode(): ?string
-    {
-        return $this->verificationCode;
-    }
-
-    public function setVerificationCode(string $verificationCode): static
-    {
-        $this->verificationCode = $verificationCode;
 
         return $this;
     }

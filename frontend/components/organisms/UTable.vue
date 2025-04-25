@@ -10,8 +10,7 @@
         width?: string;
     }
 
-    // Generic type for table data
-    type TableData = Record<string, unknown>;
+    export type TableData = Record<string, unknown>;
 
     interface TableProps {
         columns: Column[];

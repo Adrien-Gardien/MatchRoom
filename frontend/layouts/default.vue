@@ -1,11 +1,7 @@
-<script setup>
-import Header from '~/components/layout/Header.vue';
-</script>
-
 <template>
-    <div>
-        <Header />
+    <div class="w-full h-full">
         <slot />
         <UToastContainer position="top-right" />
     </div>
 </template>
+

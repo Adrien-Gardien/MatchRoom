@@ -12,7 +12,7 @@ use Symfony\Component\Serializer\SerializerInterface;
 final class UserController extends AbstractController
 {
     #[Route('/me', name: 'app_user')]
-    public function me(UserRepository $userRepository, SerializerInterface $serializerInterface): JsonResponse
+    public function index(UserRepository $userRepository, SerializerInterface $serializerInterface): JsonResponse
     {
         $current_user = $this->getUser();
         $user = $userRepository->findBy(['email' => $current_user->getUserIdentifier()])[0];

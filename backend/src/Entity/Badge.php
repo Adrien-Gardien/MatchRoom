@@ -2,10 +2,10 @@
 
 namespace App\Entity;
 
+use App\Enum\BadgeTypeEnum;
 use App\Repository\BadgeRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
-use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity(repositoryClass: BadgeRepository::class)]
@@ -17,23 +17,29 @@ class Badge
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
-    private ?string $namename = null;
+    private ?string $name = null;
 
-    #[ORM\Column(type: Types::TEXT)]
+    #[ORM\Column(length: 255)]
     private ?string $description = null;
 
     #[ORM\Column(length: 255)]
-    private ?string $image = null;
+    private ?string $icon = null;
+
+    #[ORM\Column(enumType: BadgeTypeEnum::class)]
+    private ?BadgeTypeEnum $type = null;
+
+    #[ORM\Column]
+    private ?\DateTimeImmutable $createdAt = null;
 
     /**
-     * @var Collection<int, UserBadge>
+     * @var Collection<int, User>
      */
-    #[ORM\OneToMany(targetEntity: UserBadge::class, mappedBy: 'badgeId')]
-    private Collection $userBadges;
+    #[ORM\ManyToMany(targetEntity: User::class, inversedBy: 'badges')]
+    private Collection $userId;
 
     public function __construct()
     {
-        $this->userBadges = new ArrayCollection();
+        $this->userId = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -41,14 +47,21 @@ class Badge
         return $this->id;
     }
 
-    public function getNamename(): ?string
+    public function setId(int $id): static
     {
-        return $this->namename;
+        $this->id = $id;
+
+        return $this;
     }
 
-    public function setNamename(string $namename): static
+    public function getName(): ?string
     {
-        $this->namename = $namename;
+        return $this->name;
+    }
+
+    public function setName(string $name): static
+    {
+        $this->name = $name;
 
         return $this;
     }
@@ -65,44 +78,62 @@ class Badge
         return $this;
     }
 
-    public function getImage(): ?string
+    public function getIcon(): ?string
     {
-        return $this->image;
+        return $this->icon;
     }
 
-    public function setImage(string $image): static
+    public function setIcon(string $icon): static
     {
-        $this->image = $image;
+        $this->icon = $icon;
+
+        return $this;
+    }
+
+    public function getType(): ?BadgeTypeEnum
+    {
+        return $this->type;
+    }
+
+    public function setType(BadgeTypeEnum $type): static
+    {
+        $this->type = $type;
+
+        return $this;
+    }
+
+    public function getCreatedAt(): ?\DateTimeImmutable
+    {
+        return $this->createdAt;
+    }
+
+    public function setCreatedAt(\DateTimeImmutable $createdAt): static
+    {
+        $this->createdAt = $createdAt;
 
         return $this;
     }
 
     /**
-     * @return Collection<int, UserBadge>
+     * @return Collection<int, User>
      */
-    public function getUserBadges(): Collection
+    public function getUserId(): Collection
     {
-        return $this->userBadges;
+        return $this->userId;
     }
 
-    public function addUserBadge(UserBadge $userBadge): static
+    public function addUserId(User $userId): static
     {
-        if (!$this->userBadges->contains($userBadge)) {
-            $this->userBadges->add($userBadge);
-            $userBadge->setBadgeId($this);
+        if (!$this->userId->contains($userId)) {
+            $this->userId->add($userId);
         }
 
         return $this;
     }
 
-    public function removeUserBadge(UserBadge $userBadge): static
+    public function removeUserId(User $userId): static
     {
-        if ($this->userBadges->removeElement($userBadge)) {
-            // set the owning side to null (unless already changed)
-            if ($userBadge->getBadgeId() === $this) {
-                $userBadge->setBadgeId(null);
-            }
-        }
+        $this->userId->removeElement($userId);
 
         return $this;
     }

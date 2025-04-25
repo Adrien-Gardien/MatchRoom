@@ -25,7 +25,7 @@
         info: InfoCircleIcon,
     };
 
-    const baseClasses = 'flex p-4 gap-4 shadow-lg rounded-lg border border-secondary-alt relative max-w-[400px]';
+    const baseClasses = 'flex bg-primary p-4 gap-4 shadow-lg rounded-lg border border-secondary-alt relative max-w-[400px]';
 
     const iconColor = computed(() => {
         if (_props.toast.type === 'info') return 'brand';
