@@ -36,7 +36,7 @@ class Service
 
     public function __construct()
     {
-        $this->rooms = new ArrayCollection();
+//        $this->rooms = new ArrayCollection();
         $this->userPreferences = new ArrayCollection();
     }
 
