@@ -25,12 +25,15 @@ const fetchHotel = async () => {
     });
     hotel.value = data;
     rooms.value = data.rooms || [];
-
+    
     if (authStore.user && data.favorites) {
-      const existing = data.favorites.find((f: any) => f.userId === authStore.user.id);
+      const existing = data.favorites.find((f: any) => f.userIdSerialized === authStore.user.id && f.hotelIdSerialized === hotel.value.id);
+
       if (existing) {
         isFavorite.value = true;
         favoriteId.value = existing.id;
+      } else {
+        isFavorite.value = false;
       }
     }
   } catch (err: any) {
@@ -58,18 +61,20 @@ const toggleFavorite = async () => {
       isFavorite.value = false;
       favoriteId.value = null;
     } else {
-      await $fetch(`${apiUrl}/api/favorite`, {
+      const response = await $fetch(`${apiUrl}/api/favorite`, {
         method: 'POST',
         credentials: 'include',
         body: {
           userId: authStore.user.id,
-          hotelId: hotel.value?.id,
+          hotelId: hotel.value.id,
           addedDate: new Date().toISOString(),
         },
       });
 
-      isFavorite.value = true;
-      await fetchHotel();
+      if (response && response.id) {
+        favoriteId.value = response.id;
+        isFavorite.value = true;
+      }
     }
   } catch (err: any) {
     console.error('Erreur lors du toggle favori :', err);

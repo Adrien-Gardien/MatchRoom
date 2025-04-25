@@ -56,7 +56,7 @@ class Hotel
      * @var Collection<int, Favorite>
      */
     #[ORM\OneToMany(targetEntity: Favorite::class, mappedBy: 'hotelId')]
-    #[Groups(['hotel:read'])]  // Ne pas inclure dans favorite:read pour éviter circularité
+    #[Groups(['hotel:read', 'hotel:favorites'])]  // Inclure le groupe 'hotel:favorites' pour les favoris
     private Collection $favorites;
 
     #[ORM\Column(length: 255)]

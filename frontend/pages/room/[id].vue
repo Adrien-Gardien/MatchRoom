@@ -1,8 +1,10 @@
 <script setup>
 import { ref, onMounted, computed, onUnmounted, watch } from 'vue';
 import { useRoute, navigateTo } from '#app';
+import { useAuthStore } from '@/stores/auth';
 import UBaseModal from '~/components/molecules/UBaseModal.vue';
 import UDatePicker from '~/components/molecules/UDatePicker.vue';
+import { useOfferStore } from '@/stores/offer';
 
 const route = useRoute();
 const id = route.params.id;
@@ -107,6 +109,7 @@ const updateNightsAndTotal = () => {
   }
 };
 
+
 // Watchers
 watch(() => selectedDates.value.checkIn, updateNightsAndTotal);
 watch(() => selectedDates.value.checkOut, updateNightsAndTotal);
@@ -117,6 +120,12 @@ onMounted(() => {
   fetchRoom();
   window.addEventListener('keydown', handleKeyDown);
 });
+
+watch(room, (newRoom) => {
+  fetchUserOffer();
+  getChildrenOffers();
+});
+
 
 onUnmounted(() => {
   window.removeEventListener('keydown', handleKeyDown);
@@ -137,26 +146,43 @@ const closeNegotiationModal = () => {
   isNegotiationModalOpen.value = false;
 };
 
-const submitNegotiationOffer = () => {
-  console.log("Offre envoyée:", {
-    roomId: id,
-    checkIn: selectedDates.value.checkIn,
-    checkOut: selectedDates.value.checkOut,
-    pricePerNight: negotiationOffer.value.pricePerNight,
-    numberOfNights: negotiationOffer.value.numberOfNights,
-    totalPrice: negotiationOffer.value.totalPrice
-  });
-
-  alert(`Votre offre de ${negotiationOffer.value.totalPrice}€ (${negotiationOffer.value.pricePerNight}€/nuit) a été envoyée à l'hôtel. Vous recevrez une réponse sous 24h.`);
-  closeNegotiationModal();
+const submitNegotiationOffer = async () => {
+  try {
+    const authStore = useAuthStore();
+    if (authStore.user) {
+      const response = await useAuthFetch('/api/offer', {
+        method: 'POST',
+        body: JSON.stringify({
+          roomId: room.value.id,
+          proposedPrice: negotiationOffer.value.pricePerNight,
+          status: 'pending',
+          offerDate: new Date().toISOString().split('T')[0],
+          userId: authStore.user.id,
+        }),
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+      console.log('Offer submitted:', response?.data);
+      if (response?.data?.value) {
+        // Récupérer l'offre utilisateur après la soumission
+        await fetchUserOffer();
+        await getChildrenOffers();
+      }
+    } else {
+      console.error('User is not authenticated.');
+    }
+  } catch (err) {
+    console.error('An error occurred while submitting the offer:', err);
+  } finally {
+    closeNegotiationModal();
+  }
 };
 
-// Redirection vers l'hôtel
 const navigateToHotel = () => {
   navigateTo(`/hotel/${room.value.hotel.id}`);
 };
 
-// Galerie d'images
 const openGallery = (index = 0) => {
   currentImageIndex.value = index;
   isGalleryOpen.value = true;
@@ -184,10 +210,45 @@ const handleKeyDown = (e) => {
   else if (e.key === 'ArrowLeft') prevImage();
   else if (e.key === 'Escape') closeGallery();
 };
+const authStore = useAuthStore();
+const offerStore = useOfferStore();
 
-console.log(room);
+const userOffer = computed(() => offerStore.userOffer);
+const childrenOffers = computed(() => offerStore.childrenOffers);
+
+const fetchUserOffer = async () => {
+  if (!authStore.user || !room.value?.id) return;
+
+  try {
+    await offerStore.fetchUserOffer({
+      roomId: room.value.id,
+      userId: authStore.user.id,
+    });
+  } catch (err) {
+    console.error('Erreur lors de la récupération de l\'offre utilisateur:', err);
+  }
+};
+
+const getChildrenOffers = async () => {
+  if (!authStore.user || !room.value?.id) return;
+  console.log('Récupération des offres enfants pour l\'offre utilisateur:', offerStore.userOffer);
+  if (!offerStore.userOffer?.value?.id) {
+    console.warn('Aucune offre utilisateur trouvée, donc pas d\'offres enfants à récupérer.');
+    return;
+  }
+  const offerId = offerStore.userOffer.value.id;
+
+  try {
+    await offerStore.getChildrenOffers({
+      offerId: offerStore.userOffer.id,
+    });
+  } catch (err) {
+    console.error('Erreur lors de la récupération des offres enfants:', err);
+  }
+};
+
+
 </script>
-
 
 <template>
   <div v-if="isLoading" class="flex justify-center items-center h-screen bg-cream">
@@ -372,13 +433,45 @@ v-for="i in 5" :key="i" xmlns="http://www.w3.org/2000/svg"
               </div>
 
               <div class="space-y-4">
-                <button 
-                  class="w-full bg-everglade text-colonial-white py-3 rounded-lg hover:bg-everglade-light transition font-semibold" 
-                  @click="openNegotiationModal"
-                >
-                  Faire une offre
-                </button>
-                
+                <!-- Bouton Faire une offre ou statut si une offre existe -->
+                <div v-if="!userOffer">
+                  <button 
+                    class="w-full bg-everglade text-colonial-white py-3 rounded-lg hover:bg-everglade-light transition font-semibold" 
+                    @click="openNegotiationModal"
+                  >
+                    Faire une offre
+                  </button>
+                </div>
+                <div v-else>
+                  <p class="text-center text-xl font-semibold text-burning-orange">
+                    Vous avez déjà fait une offre
+                  </p>
+                  <div class="text-center text-quincy-light">
+                    <p>Statut: <span class="font-bold" :class="offerStatusClass">{{ userOffer.status }}</span></p>
+                    <p>Prix proposé: {{ userOffer.proposedPrice }}€</p>
+                    <p>Date de l'offre: {{ userOffer.offerDate }}</p>
+                  </div>
+                </div>
+
+                <div class="space-y-4">
+                <!-- Affichage des offres enfants si elles existent -->
+                <div v-if="childrenOffers?.length">
+                  <p class="text-center text-xl font-semibold text-burning-orange">
+                    Réponses du propriétaire
+                  </p>
+                  <div 
+                    v-for="child in childrenOffers" 
+                    :key="child.id"
+                    class="text-center text-quincy-light border border-colonial-white-dark rounded-lg p-4"
+                  >
+                    <p>Statut: <span class="font-bold" :class="getOfferStatusClass(child.status)">{{ child.status }}</span></p>
+                    <p>Prix proposé: {{ child.proposedPrice }}€</p>
+                    <p>Date de l'offre: {{ child.offerDate }}</p>
+                  </div>
+                </div>
+              </div>
+
+
                 <div class="border-t border-colonial-white-dark pt-4">
                   <h3 class="font-semibold text-lg mb-3 text-everglade">Détails rapides</h3>
                   <ul class="space-y-3">

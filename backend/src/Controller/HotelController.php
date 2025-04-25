@@ -51,12 +51,10 @@ final class HotelController extends AbstractController
     #[Route('/{id}', name: 'show', methods: ['GET'])]
     public function show(Hotel $hotel): JsonResponse
     {
-        // Utiliser les groupes de sérialisation
         return $this->json($hotel, 200, [], [
-            'groups' => ['hotel:read']
+            'groups' => ['hotel:read', 'hotel:favorites', 'userfavorite:read']
         ]);
-    }
-    
+    }    
     
     #[Route('', name: 'create', methods: ['POST'])]
     public function create(Request $request, EntityManagerInterface $em): JsonResponse

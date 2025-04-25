@@ -16,7 +16,7 @@ use Symfony\Component\Routing\Attribute\Route;
 #[Route('/api/offer', name: 'app_offer_')]
 final class OfferController extends AbstractController
 {
-    #[Route('', name: 'index', methods: ['GET'])]
+    #[Route('/all', name: 'index', methods: ['GET'])]
     public function index(OfferRepository $repository): JsonResponse
     {
         $offers = $repository->findAll();
@@ -35,19 +35,107 @@ final class OfferController extends AbstractController
         return $this->json($data);
     }
 
-    #[Route('/{id}', name: 'show', methods: ['GET'])]
-    public function show(Offer $offer): JsonResponse
+    #[Route('', name: 'show', methods: ['GET'])]
+    public function show(Request $request, OfferRepository $offerRepository, UserRepository $userRepository, RoomRepository $roomRepository): JsonResponse
     {
-        return $this->json([
+        // Récupérer les paramètres de la requête
+        $userId = $request->query->get('userId');
+        $roomId = $request->query->get('roomId');
+        // Recherche de l'utilisateur
+        $user = $userRepository->find($userId);
+        if (!$user) {
+            return $this->json([
+                'message' => 'Utilisateur non trouvé'
+            ], Response::HTTP_NOT_FOUND);
+        }
+    
+        // Recherche de la chambre
+        $room = $roomRepository->find($roomId);
+        if (!$room) {
+            return $this->json([
+                'message' => 'Chambre non trouvée'
+            ], Response::HTTP_NOT_FOUND);
+        }
+        
+        // Recherche de l'offre en fonction de userId et roomId
+        $offer = $offerRepository->findOneBy([
+            'userId' => $userId,
+            'roomId' => $roomId,
+        ]);
+    
+        // Vérifier si l'offre existe
+        if (!$offer) {
+            return $this->json([
+                'message' => 'Offre non trouvée pour cet utilisateur et cette chambre'
+            ], Response::HTTP_NOT_FOUND);
+        }
+        
+        // Format de la réponse
+        $data = [
             'id' => $offer->getId(),
             'proposedPrice' => $offer->getProposedPrice(),
             'status' => $offer->getStatus(),
             'offerDate' => $offer->getOfferDate()?->format('Y-m-d'),
-            'userId' => $offer->getUserId()?->getId(),
-            'roomId' => $offer->getRoomId()?->getId(),
-        ]);
+            'user' => $user ? [
+                'id' => $user->getId(),
+                'name' => $user->getFirstName()
+            ] : null,
+            'room' => $room ? [
+                'id' => $room->getId(),
+                'name' => $room->getName()
+            ] : null,
+            'parentOffer' => $offer->getParentOffer() ? [
+                'id' => $offer->getParentOffer()->getId(),
+                'proposedPrice' => $offer->getParentOffer()->getProposedPrice(),
+                'status' => $offer->getParentOffer()->getStatus(),
+                'offerDate' => $offer->getParentOffer()->getOfferDate()?->format('Y-m-d'),
+            ] : null,
+        ];
+        
+        return $this->json($data);
     }
 
+    #[Route('/{offerId}/children', name: 'show_childrens', methods: ['GET'])]
+    public function showChildrens($offerId, OfferRepository $offerRepository): JsonResponse
+    {
+        // Recherche de l'offre principale par son ID
+        $offer = $offerRepository->find($offerId);
+    
+        // Vérifie si l'offre existe
+        if (!$offer) {
+            return $this->json([
+                'message' => 'Offre principale non trouvée',
+            ], Response::HTTP_NOT_FOUND);
+        }
+    
+        // Recherche des offres enfants liées à l'offre principale
+        $childrenOffers = $offerRepository->findBy([
+            'parentOffer' => $offerId,
+        ]);
+    
+        // Si aucune offre enfant n'est trouvée
+        if (empty($childrenOffers)) {
+            return $this->json([
+                'message' => 'Aucune offre enfant trouvée',
+            ], Response::HTTP_NOT_FOUND);
+        }
+    
+        // Renvoyer les données des offres enfants
+        $childrenData = [];
+        foreach ($childrenOffers as $childOffer) {
+            $childrenData[] = [
+                'id' => $childOffer->getId(),
+                'proposedPrice' => $childOffer->getProposedPrice(),
+                'status' => $childOffer->getStatus(),
+                'offerDate' => $childOffer->getOfferDate()?->format('Y-m-d'),
+                'userId' => $childOffer->getUserId()?->getId(),
+                'roomId' => $childOffer->getRoomId()?->getId(),
+            ];
+        }
+    
+        return $this->json($childrenData);
+    }
+            
     #[Route('', name: 'create', methods: ['POST'])]
     public function create(
         Request $request,

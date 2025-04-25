@@ -15,8 +15,19 @@ final class UserController extends AbstractController
     public function me(UserRepository $userRepository, SerializerInterface $serializerInterface): JsonResponse
     {
         $current_user = $this->getUser();
-        $user = $userRepository->findBy(['email' => $current_user->getUserIdentifier()])[0];
-        $userSerialized = $serializerInterface->serialize($user, 'json', ['ignored_attributes' => ['password', 'userIdentifier']]);
+        $user = $userRepository->findOneBy(['email' => $current_user->getUserIdentifier()]);
+
+        // Sérialisation avec gestion des références circulaires
+        $userSerialized = $serializerInterface->serialize(
+            $user, 
+            'json', 
+            [
+                'ignored_attributes' => ['password', 'userIdentifier'],
+                'circular_reference_handler' => function ($object) {
+                    return $object->getId(); // Retourne seulement l'ID pour éviter la boucle
+                }
+            ]
+        );
 
         return JsonResponse::fromJsonString($userSerialized);
     }

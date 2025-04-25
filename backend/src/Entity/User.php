@@ -20,14 +20,14 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
-    #[Groups(['user:read', 'favorite:read', 'booking:read', 'offer:read', 'rating:read', 'matching:read'])]
+    #[Groups(['user:read', 'favorite:read', 'booking:read', 'offer:read', 'rating:read'])]
     /**
      * @phpstan-ignore-next-line
      */
     private ?int $id = null;
 
     #[ORM\Column(length: 180)]
-    #[Groups(['user:read', 'favorite:read', 'booking:read', 'offer:read', 'rating:read', 'matching:read'])]
+    #[Groups(['user:read', 'favorite:read', 'booking:read', 'offer:read', 'rating:read'])]
     private ?string $email = null;
 
     /**
@@ -45,11 +45,11 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     private ?string $password = null;
 
     #[ORM\Column(length: 255)]
-    #[Groups(['user:read', 'favorite:read', 'booking:read', 'offer:read', 'rating:read', 'matching:read'])]
+    #[Groups(['user:read', 'favorite:read', 'booking:read', 'offer:read', 'rating:read'])]
     private ?string $firstName = null;
 
     #[ORM\Column(length: 255)]
-    #[Groups(['user:read', 'favorite:read', 'booking:read', 'offer:read', 'rating:read', 'matching:read'])]
+    #[Groups(['user:read', 'favorite:read', 'booking:read', 'offer:read', 'rating:read'])]
     private ?string $lastName = null;
 
     #[ORM\ManyToOne(inversedBy: 'owners')]
@@ -76,13 +76,6 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\OneToMany(targetEntity: Rating::class, mappedBy: 'authorId')]
     #[Groups(['user:read'])]
     private Collection $ratings;
-
-    /**
-     * @var Collection<int, Matching>
-     */
-    #[ORM\OneToMany(targetEntity: Matching::class, mappedBy: 'userId')]
-    #[Groups(['user:read'])]
-    private Collection $matchings;
 
     /**
      * @var Collection<int, UserPreference>
@@ -124,7 +117,6 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         $this->bookings = new ArrayCollection();
         $this->offers = new ArrayCollection();
         $this->ratings = new ArrayCollection();
-        $this->matchings = new ArrayCollection();
         $this->userPreferences = new ArrayCollection();
         $this->favorites = new ArrayCollection();
         $this->searches = new ArrayCollection();
@@ -326,36 +318,6 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
             // set the owning side to null (unless already changed)
             if ($rating->getAuthorId() === $this) {
                 $rating->setAuthorId(null);
-            }
-        }
-
-        return $this;
-    }
-
-    /**
-     * @return Collection<int, Matching>
-     */
-    public function getMatchings(): Collection
-    {
-        return $this->matchings;
-    }
-
-    public function addMatching(Matching $matching): static
-    {
-        if (!$this->matchings->contains($matching)) {
-            $this->matchings->add($matching);
-            $matching->setUserId($this);
-        }
-
-        return $this;
-    }
-
-    public function removeMatching(Matching $matching): static
-    {
-        if ($this->matchings->removeElement($matching)) {
-            // set the owning side to null (unless already changed)
-            if ($matching->getUserId() === $this) {
-                $matching->setUserId(null);
             }
         }
 

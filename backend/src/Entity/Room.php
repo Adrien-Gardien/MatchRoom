@@ -72,14 +72,6 @@ class Room
     #[ORM\OneToMany(targetEntity: Rating::class, mappedBy: 'roomId')]
     #[Groups(['room:read'])]
     private Collection $ratings;
-
-    /**
-     * @var Collection<int, Matching>
-     */
-    #[ORM\OneToMany(targetEntity: Matching::class, mappedBy: 'roomId')]
-    #[Groups(['room:read'])]
-    private Collection $matchings;
-
     /**
      * @var Collection<int, Favorite>
      */
@@ -101,7 +93,6 @@ class Room
         $this->bookings = new ArrayCollection();
         $this->offers = new ArrayCollection();
         $this->ratings = new ArrayCollection();
-        $this->matchings = new ArrayCollection();
         $this->favorites = new ArrayCollection();
     }
 
@@ -302,36 +293,6 @@ class Room
             // set the owning side to null (unless already changed)
             if ($rating->getRoomId() === $this) {
                 $rating->setRoomId(null);
-            }
-        }
-
-        return $this;
-    }
-
-    /**
-     * @return Collection<int, Matching>
-     */
-    public function getMatchings(): Collection
-    {
-        return $this->matchings;
-    }
-
-    public function addMatching(Matching $matching): static
-    {
-        if (!$this->matchings->contains($matching)) {
-            $this->matchings->add($matching);
-            $matching->setRoomId($this);
-        }
-
-        return $this;
-    }
-
-    public function removeMatching(Matching $matching): static
-    {
-        if ($this->matchings->removeElement($matching)) {
-            // set the owning side to null (unless already changed)
-            if ($matching->getRoomId() === $this) {
-                $matching->setRoomId(null);
             }
         }
 

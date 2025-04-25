@@ -84,4 +84,16 @@ class Favorite
 
         return $this;
     }
+    
+    #[Groups(['favorite:read', 'hotel:read'])]
+    public function getHotelIdSerialized(): ?int
+    {
+        return $this->hotelId ? $this->hotelId->getId() : null;
+    }
+
+    #[Groups(['favorite:read', 'userfavorite:read'])]
+    public function getUserIdSerialized(): ?int
+    {
+        return $this->userId ? $this->userId->getId() : null;
+    }
 }
