@@ -11,8 +11,8 @@ const image = computed(() => props.hotel.images[0])
 </script>
 
 <template>
-    <div class="min-w-96 cursor-pointer" @click="navigateTo(`/hotel/${hotel.id}`)">
-        <img :src="image.url" alt="Hotel cover image" class="rounded-2xl object-cover min-h-64 max-h-64 h-full w-full">
+    <div class="w-full sm:min-w-80 md:min-w-96 h-fit cursor-pointer" @click="navigateTo(`/hotel/${hotel.id}`)">
+        <img :src="image.url" alt="Hotel cover image" class="rounded-2xl object-cover min-h-48 sm:min-h-56 md:min-h-64 h-full w-full">
         <div class="mt-4">
             <p class="text-brand-secondary text-xs mb-2">Hotel</p>
             <p class="text-lg font-semibold text-primary mb-1">{{ hotel.name }}</p>

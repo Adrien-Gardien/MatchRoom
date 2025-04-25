@@ -148,22 +148,22 @@ onMounted(() => {
 
 <template>
   <NuxtLayout name="customer">
-    <div class="max-w-4xl h-full mx-auto px-4 py-8">
-      <h1 class="text-3xl font-bold mb-8 text-center">MatchRoom</h1>
+    <div class="max-w-4xl mx-auto px-4 py-10 sm:py-8">
+      <h1 class="text-2xl sm:text-3xl font-bold mb-6 sm:mb-8 text-center">MatchRoom</h1>
       
       <div v-if="loading" class="flex justify-center items-center h-64">
-        <div class="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-blue-500"></div>
+        <ULoading />
       </div>
       
       <div v-else-if="currentRoom" class="relative">
         <!-- Card pour la chambre actuelle -->
         <div 
           ref="cardElement" 
-          class="bg-white rounded-xl shadow-lg overflow-hidden transform transition-all duration-300"
+          class="bg-primary border border-secondary rounded-xl shadow-sm overflow-hidden transform transition-all duration-300"
           :class="{ 'translate-x-[200%] opacity-0 rotate-12': swipeDirection === 'right', 'translate-x-[-200%] opacity-0 -rotate-12': swipeDirection === 'left' }"
         >
           <!-- Carousel d'images -->
-          <div class="relative h-80">
+          <div class="relative h-60 sm:h-80">
             <div v-if="currentRoom.images && currentRoom.images.length > 0" class="h-full w-full">
               <img 
                 :src="currentRoom.images[currentImageIndex].url" 
@@ -177,17 +177,17 @@ onMounted(() => {
                   v-for="(_, index) in currentRoom.images" 
                   :key="index"
                   class="w-2 h-2 rounded-full"
-                  :class="currentImageIndex === index ? 'bg-white' : 'bg-gray-400'"
+                  :class="currentImageIndex === index ? 'bg-brand-solid' : 'bg-gray-400'"
                   @click="currentImageIndex = index"
                 ></button>
               </div>
               
               <div class="absolute top-0 left-0 right-0 p-4 bg-gradient-to-b from-black/50 to-transparent">
                 <div class="flex items-center justify-between">
-                  <span class="bg-blue-500 text-white px-3 py-1 rounded-full text-sm font-bold">
+                  <span class="bg-brand-solid text-white px-2 py-1 sm:px-3 sm:py-1 rounded-full text-xs sm:text-sm font-bold">
                     {{ currentRoom.price }}€ / nuit
                   </span>
-                  <span class="bg-blue-500 text-white px-3 py-1 rounded-full text-sm">
+                  <span class="bg-brand-solid text-white px-2 py-1 sm:px-3 sm:py-1 rounded-full text-xs sm:text-sm">
                     {{ currentRoom.hotel.name }}
                   </span>
                 </div>
@@ -199,44 +199,44 @@ onMounted(() => {
           </div>
           
           <!-- Détails de la chambre -->
-          <div class="p-6">
-            <h2 class="text-2xl font-bold mb-2">{{ currentRoom.name }}</h2>
-            <div class="flex items-center gap-2 mb-3">
-              <span class="text-gray-600">{{ currentRoom.capacity }} personnes</span>
-              <span class="text-gray-600">•</span>
-              <span class="text-gray-600">{{ currentRoom.hotel.city }}</span>
+          <div class="p-4 sm:p-6">
+            <h2 class="text-xl sm:text-2xl font-bold mb-2 text-primary">{{ currentRoom.name }}</h2>
+            <div class="flex flex-wrap items-center gap-2 mb-3">
+              <span class="text-tertiary text-sm sm:text-base">{{ currentRoom.capacity }} personnes</span>
+              <span class="text-tertiary">•</span>
+              <span class="text-tertiary text-sm sm:text-base">{{ currentRoom.hotel.city }}</span>
             </div>
             
-            <p class="text-gray-700 mb-4 line-clamp-3">{{ currentRoom.description }}</p>
+            <p class="text-tertiary mb-4 line-clamp-3 text-sm sm:text-base">{{ currentRoom.description }}</p>
             
             <!-- Boutons d'actions -->
             <div class="flex justify-between mt-4">
               <UButton 
                 variant="secondary"
-                class="!rounded-full !w-14 !h-14 !p-0 !border-red-500 !text-red-500 hover:!bg-red-50"
+                class="!rounded-full !w-12 !h-12 sm:!w-14 sm:!h-14 !p-0 !border-red-500 !text-red-500 hover:!bg-red-50"
                 @click="swipeLeft"
               >
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 sm:h-8 sm:w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
                 </svg>
               </UButton>
               
               <UButton 
                 variant="secondary"
-                class="!rounded-full !w-14 !h-14 !p-0 !border-blue-500 !text-blue-500 hover:!bg-blue-50"
+                class="!rounded-full !w-12 !h-12 sm:!w-14 sm:!h-14 !p-0 !border-brand-solid !text-brand-solid hover:!bg-brand-50"
                 @click="openNegotiationModal"
               >
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 sm:h-8 sm:w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
                 </svg>
               </UButton>
               
               <UButton 
                 variant="secondary"
-                class="!rounded-full !w-14 !h-14 !p-0 !border-green-500 !text-green-500 hover:!bg-green-50"
+                class="!rounded-full !w-12 !h-12 sm:!w-14 sm:!h-14 !p-0 !border-green-500 !text-green-500 hover:!bg-green-50"
                 @click="swipeRight"
               >
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 sm:h-8 sm:w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
                 </svg>
               </UButton>
@@ -246,8 +246,8 @@ onMounted(() => {
       </div>
       
       <div v-else class="text-center py-8">
-        <h3 class="text-xl font-medium mb-4">Plus de chambres disponibles</h3>
-        <p class="text-gray-600 mb-6">Revenez plus tard pour découvrir de nouvelles chambres</p>
+        <h3 class="text-lg sm:text-xl font-medium mb-3 sm:mb-4 text-primary">Plus de chambres disponibles</h3>
+        <p class="text-tertiary text-sm sm:text-base mb-5 sm:mb-6">Revenez plus tard pour découvrir de nouvelles chambres</p>
         <UButton 
           variant="primary"
           @click="loadRooms"
@@ -260,25 +260,26 @@ onMounted(() => {
     <!-- Modal de négociation avec UBaseModal -->
     <UBaseModal 
       :is-open="showNegotiationModal"
+      background="circles"
       @close="closeNegotiationModal"
     >
-      <div class="p-6">
-        <h3 class="text-xl font-bold mb-4">Faire une offre</h3>
-        <p class="mb-4">
-          Prix initial: <span class="font-bold">{{ currentRoom?.price }}€</span> / nuit
+      <div class="p-4 sm:p-6">
+        <h3 class="text-lg sm:text-xl font-bold mb-3 sm:mb-4 text-primary">Faire une offre</h3>
+        <p class="mb-3 sm:mb-4 text-sm sm:text-base text-tertiary">
+          Prix initial: <span class="font-bold text-primary">{{ currentRoom?.price }}€</span> / nuit
         </p>
         
         <div class="mb-4">
-          <label class="block text-sm font-medium text-gray-700 mb-1">Votre offre (€ par nuit)</label>
+          <label class="block text-sm font-medium text-secondary mb-1">Votre offre (€ par nuit)</label>
           <input 
             v-model="offerPrice" 
             type="number" 
-            class="w-full px-4 py-2 border rounded-lg focus:ring focus:ring-blue-300"
+            class="w-full px-3 sm:px-4 py-2 border border-secondary rounded-lg focus:ring focus:ring-brand-solid text-secondary text-sm sm:text-base bg-primary"
             :placeholder="currentRoom?.price + ''"
           />
         </div>
         
-        <div class="flex gap-4 justify-end">
+        <div class="flex gap-3 sm:gap-4 justify-end">
           <UButton
             variant="tertiary"
             @click="closeNegotiationModal"
@@ -310,5 +311,13 @@ onMounted(() => {
 .card-leave-to {
   opacity: 0;
   transform: translateY(30px);
+}
+
+/* Ajout de styles responsive pour les petits écrans */
+@media (max-width: 640px) {
+  .card-enter-from,
+  .card-leave-to {
+    transform: translateY(20px);
+  }
 }
 </style>

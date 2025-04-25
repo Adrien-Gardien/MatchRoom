@@ -8,12 +8,14 @@
         closeButton?: boolean;
         background?: 'grid' | 'circles' | 'squares' | 'empty';
         backgroundSize?: 'sm' | 'md' | 'lg';
+        fullWidth?: boolean;
     }
 
     const _props = withDefaults(defineProps<BaseModalProps>(), {
         closeButton: true,
         background: 'empty',
         backgroundSize: 'sm',
+        fullWidth: false,
     });
 
     const backgroundComponent = {
@@ -54,16 +56,19 @@
     </transition>
 
     <transition name="modal">
-        <div v-if="isOpen" class="fixed inset-0 z-50 flex items-center justify-center" @click.self="close">
+        <div v-if="isOpen" class="fixed inset-0 z-50 flex items-center justify-center px-4 sm:px-6" @click.self="close">
             <div
-                class="relative bg-primary rounded-2xl shadow-xl max-w-lg w-full transform transition-all "
+                :class="[
+                    'relative overflow-hidden bg-primary rounded-2xl shadow-xl transform transition-all',
+                    fullWidth ? 'w-full sm:max-w-lg md:max-w-xl lg:max-w-2xl' : 'w-full max-w-[90%] sm:max-w-lg'
+                ]"
             >
                 <component
                     :is="backgroundComponent[background]"
                     v-if="background !== 'empty'"
                     :class="[backgroundSizeClasses[backgroundSize], 'scale-150 -z-10']"
                 />
-                <CloseButton v-if="closeButton" class="absolute top-6 right-6" @click="close" />
+                <CloseButton v-if="closeButton" class="absolute top-4 right-4 sm:top-6 sm:right-6" @click="close" />
                 <slot />
             </div>
         </div>

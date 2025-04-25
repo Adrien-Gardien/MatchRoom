@@ -41,25 +41,25 @@
 
 <template>
     <NuxtLayout name="customer">
-        <section class="max-w-7xl w-full mx-auto">
-            <section class="w-full pt-32">
-                <div class="py-20 rounded-2xl flex items-center justify-center bg-red-200 relative">
+        <section class="max-w-7xl w-full mx-auto px-4 sm:px-6">
+            <section class="w-full pt-24 sm:pt-32">
+                <div class="py-12 sm:py-20 rounded-2xl flex items-center justify-center bg-red-200 relative">
                     <div class="w-full h-full rounded-2xl overflow-hidden absolute top-0 left-0">
                         <img
                             src="https://toploc.com/blog/wp-content/uploads/2016/06/Maison-de-hobbit-achevee-%C2%A9simondale.net_.jpg"
                             class="w-full h-full object-cover blur-sm"
                         />
                     </div>
-                    <div class="text-center z-[5]">
-                        <h1 class="text-4xl font-semibold text-primary-on-brand">Négociez votre chambre d’hôtel</h1>
-                        <p class="text-primary-on-brand text-lg">
+                    <div class="text-center z-[5] px-4 sm:px-6">
+                        <h1 class="text-2xl sm:text-3xl md:text-4xl font-semibold text-primary-on-brand">Négociez votre chambre d'hôtel</h1>
+                        <p class="text-primary-on-brand text-base sm:text-lg">
                             Recherchez une chambre disponible aux dates et destinations de votre choix, Négociez et
                             Réservez.
                         </p>
 
-                        <div class="mt-14 max-w-screen-sm space-y-3">
+                        <div class="mt-8 sm:mt-14 max-w-screen-sm space-y-3 w-full">
                             <UInput placeholder="Destination, thématique" type="text" :icon="SearchIcon" />
-                            <div class="flex w-full justify-between gap-2">
+                            <div class="flex flex-col sm:flex-row w-full justify-between gap-2">
                                 <UDatePicker v-model="arrivalDate" placeholder="Arrivée" type="date" class="w-full" />
                                 <UDatePicker v-model="departureDate" placeholder="Départ" type="date" class="w-full" />
                                 <UInputNumber
@@ -72,20 +72,20 @@
                             </div>
                         </div>
 
-                        <UButton :icon="SearchIcon" icon-position="leading" class="mx-auto mt-8">Rechercher</UButton>
+                        <UButton :icon="SearchIcon" icon-position="leading" class="mx-auto mt-6 sm:mt-8">Rechercher</UButton>
                     </div>
                 </div>
             </section>
         </section>
-        <section class="mx-auto max-w-7xl w-full mt-16">
-            <h2 class="text-2xl font-semibold">Découvrez ces hotels !</h2>
-            <div class="flex items-center overflow-x-auto gap-12 mt-4">
+        <section class="mx-auto max-w-7xl w-full mt-10 sm:mt-16 px-4 sm:px-6">
+            <h2 class="text-xl sm:text-2xl font-semibold text-primary">Découvrez ces hotels !</h2>
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mt-4">
                 <UHotelCard v-for="hotel in hotels" :key="hotel.id" :hotel="hotel" />
             </div>
         </section>
-        <section class="mx-auto max-w-7xl w-full mt-16">
-            <h2 class="text-2xl font-semibold">Découvrez ces chambres !</h2>
-            <div class="flex items-center overflow-x-auto gap-12 mt-4">
+        <section class="mx-auto max-w-7xl w-full mt-10 sm:mt-16 px-4 sm:px-6 pb-8">
+            <h2 class="text-xl sm:text-2xl font-semibold text-primary">Découvrez ces chambres !</h2>
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mt-4">
                 <UHotelCard v-for="hotel in hotels" :key="hotel.id" :hotel="hotel" />
             </div>
         </section>

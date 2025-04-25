@@ -174,7 +174,7 @@ final class RoomController extends AbstractController
     }
     
     #[Route('/rooms/{id}', name: 'app_room_show', methods: ['GET'])]
-    public function show(int $id): JsonResponse
+    public function show(int $id, ImageRepository $imageRepository): JsonResponse
     {
         $room = $this->roomRepository->find($id);
         
@@ -182,9 +182,50 @@ final class RoomController extends AbstractController
             return $this->json(['message' => 'Room not found'], Response::HTTP_NOT_FOUND);
         }
         
-        return $this->json([
-            'data' => $room,
-        ], Response::HTTP_OK, [], ['groups' => 'room:read']);
+        // Construction du contexte de normalisation pour éviter les références circulaires
+        $context = (new ObjectNormalizerContextBuilder())
+            ->withCircularReferenceHandler(function ($object) {
+                return $object->getId();
+            })
+            ->withGroups(['room_details'])
+            ->withSkipNullValues(true)
+            ->toArray();
+            
+        // Sérialiser la chambre sans ses images
+        $roomArray = $this->normalizer->normalize($room, 'json', array_merge(
+            $context, 
+            [AbstractNormalizer::IGNORED_ATTRIBUTES => ['images']]
+        ));
+        
+        // Ajouter les images manuellement
+        $roomImages = $imageRepository->findBy(['room' => $room]);
+        $roomArray['images'] = [];
+        if ($roomImages) {
+            $roomArray['images'] = $this->normalizer->normalize(
+                $roomImages, 
+                'json', 
+                [
+                    'groups' => ['image_list'],
+                    AbstractNormalizer::CIRCULAR_REFERENCE_HANDLER => function ($object) {
+                        return $object->getId();
+                    }
+                ]
+            );
+        }
+        
+        // Ajouter l'hôtel lié à la chambre
+        $roomArray['hotel'] = $this->normalizer->normalize(
+            $room->getHotelId(),
+            'json',
+            [
+                'groups' => ['hotel_list'],
+                AbstractNormalizer::CIRCULAR_REFERENCE_HANDLER => function ($object) {
+                    return $object->getId();
+                }
+            ]
+        );
+        
+        return new JsonResponse($roomArray, Response::HTTP_OK);
     }
     
     #[Route('/rooms', name: 'app_room_create', methods: ['POST'])]
